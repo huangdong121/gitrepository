@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>智能财务月结系统 - 全部功能原型</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#eef0f3;color:#1f2329;font-size:14px;min-height:100vh}
+  html,body{background:#eef0f3}
+  /* top */
+  .topbar{height:56px;background:#fff;border-bottom:1px solid #f0f1f3;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(31,35,41,.04)}
+  .topbar .brand{font-size:16px;font-weight:600;color:#1d2129;display:flex;align-items:center;gap:8px}
+  .topbar .brand::before{content:'';width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#165dff,#4080ff);box-shadow:0 2px 6px rgba(22,93,255,.3)}
+  .topbar .brand b{color:#165dff}
+  .topbar .crumb{margin-left:24px;color:#86909c;font-size:13px}
+  .topbar .crumb b{color:#1d2129;font-weight:500}
+  .topbar .user{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:#4e5969;padding:6px 12px 6px 6px;border-radius:20px}
+  .topbar .user:hover{background:#f7f8fa}
+  .topbar .user .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#165dff,#4080ff);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;box-shadow:0 2px 6px rgba(22,93,255,.25)}
+  .layout{display:flex;min-height:calc(100vh - 56px)}
+  /* sidebar */
+  .sidebar{width:208px;background:#fff;border-right:1px solid #e5e6eb;padding:12px 0;overflow:auto}
+  .sg-title{padding:14px 22px 8px;font-size:11px;color:#c9cdd4;letter-spacing:1px;font-weight:600}
+  .mi{padding:10px 22px 10px 18px;cursor:pointer;color:#4e5969;font-size:13px;border-left:3px solid transparent;display:flex;align-items:center;gap:10px;transition:all .15s ease;margin:1px 0}
+  .mi:hover{background:#f7faff;color:#165dff}
+  .mi.active{background:linear-gradient(90deg,#e8f3ff,#f7faff);color:#165dff;border-left-color:#165dff;font-weight:500}
+  .mi .dot{width:5px;height:5px;border-radius:50%;background:#d6d8db}
+  .mi.active .dot{background:#165dff;box-shadow:0 0 0 3px rgba(22,93,255,.18)}
+  .mi .tag{margin-left:auto;font-size:11px;color:#86909c;background:#f0f2f5;padding:1px 6px;border-radius:8px}
+  .mi.active .tag{background:#fff;color:#165dff}
+  .content{flex:1;padding:24px;overflow:auto;background:#f5f7fa}
+  /* panel */
+  .panel{background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(31,35,41,.08),0 2px 6px rgba(31,35,41,.04);border:1px solid #ebedf0;overflow:hidden}
+  /* tab */
+  .tab-nav{display:flex;border-bottom:1px solid #e5e6eb;padding:0 24px;background:#fafbfc}
+  .tab-nav-item{padding:16px 4px;margin:0 22px 0 0;cursor:pointer;font-size:15px;color:#4e5969;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;transition:color .2s ease}
+  .tab-nav-item:hover{color:#165dff}
+  .tab-nav-item.active{color:#165dff;border-bottom-color:#165dff;font-weight:600}
+  .tab-pane{display:none;padding:20px 24px}
+  .tab-pane.active{display:block}
+  .sub-nav{display:flex;gap:24px;border-bottom:1px solid #e5e6eb;padding:0 20px;background:#fafbfc}
+  .sub-nav-item{padding:12px 0;cursor:pointer;font-size:13px;color:#4e5969;border-bottom:2px solid transparent;transition:color .15s}
+  .sub-nav-item.active{color:#165dff;border-bottom-color:#165dff;font-weight:500}
+  .sub-nav-item:hover{color:#165dff}
+  .sub-pane{display:none;padding:18px 20px;flex:1;overflow:auto}
+  .sub-pane.active{display:flex;flex-direction:column}
+  /* toolbar */
+  .filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:4px 0 14px}
+  .filter-bar .grow{flex:1}
+  .field{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+  .field .lbl{color:#86909c;font-size:13px}
+  .ipt,.sel{padding:6px 10px;border:1px solid #c9cdd4;border-radius:4px;background:#fff;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;min-width:140px;color:#1d2129}
+  .ipt:hover,.sel:hover{border-color:#86909c}
+  .ipt:focus,.sel:focus{border-color:#165dff;box-shadow:0 0 0 3px rgba(22,93,255,.12)}
+  .ipt.sm,.sel.sm{min-width:120px;padding:4px 8px}
+  .ipt.block,.sel.block{width:100%;min-width:0}
+  textarea.ipt{min-height:80px;font-family:inherit;resize:vertical}
+  /* button */
+  .btn{padding:5px 14px;border:1px solid #c9cdd4;background:#fff;color:#1d2129;border-radius:4px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;transition:all .18s ease;font-weight:400}
+  .btn:hover{color:#165dff;border-color:#165dff;box-shadow:0 2px 4px rgba(22,93,255,.08)}
+  .btn.primary{background:#165dff;border-color:#165dff;color:#fff;box-shadow:0 2px 4px rgba(22,93,255,.15)}
+  .btn.primary:hover{background:#4080ff;border-color:#4080ff;color:#fff;box-shadow:0 4px 8px rgba(22,93,255,.2)}
+  .btn.success{background:#00b42a;border-color:#00b42a;color:#fff;box-shadow:0 2px 4px rgba(0,180,42,.15)}
+  .btn.success:hover{background:#23c343;border-color:#23c343;color:#fff;box-shadow:0 4px 8px rgba(0,180,42,.2)}
+  .btn.danger{background:#f53f3f;border-color:#f53f3f;color:#fff;box-shadow:0 2px 4px rgba(245,63,63,.15)}
+  .btn.danger:hover{background:#f76560;border-color:#f76560;color:#fff;box-shadow:0 4px 8px rgba(245,63,63,.2)}
+  .btn.warn{background:#ff7d00;border-color:#ff7d00;color:#fff;box-shadow:0 2px 4px rgba(255,125,0,.15)}
+  .btn.warn:hover{background:#ff9633;border-color:#ff9633;color:#fff;box-shadow:0 4px 8px rgba(255,125,0,.2)}
+  .btn.sm{padding:3px 8px;font-size:12px}
+  .btn.link{border:none;background:transparent;color:#165dff;padding:0;box-shadow:none}
+  .btn.link:hover{background:transparent;color:#4080ff;text-decoration:underline;box-shadow:none}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+  /* table */
+  .tbl{border:1px solid #ebedf0;border-radius:8px;overflow:auto;max-height:560px;background:#fff;box-shadow:0 2px 8px rgba(31,35,41,.05)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{background:#f7f8fa;color:#1d2129;font-weight:600;text-align:left;padding:13px 14px;border-bottom:1px solid #e5e6eb;white-space:nowrap;position:sticky;top:0;font-size:13px}
+  thead th:first-child{padding-left:18px}
+  tbody td{padding:13px 14px;border-bottom:1px solid #f2f3f5;color:#4e5969;white-space:nowrap;transition:background .15s ease}
+  tbody td:first-child{padding-left:18px}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#f7faff}
+  tbody tr.fail td{background:#fff1f0}
+  tbody tr.fail:hover td{background:#ffe7e5}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  td.center{text-align:center}
+  td.mono{font-family:"Cascadia Code",Consolas,monospace;font-size:12px}
+  td .ellipsis{max-width:200px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:middle}
+  td.op{white-space:nowrap}
+  td.op .btn+.btn{margin-left:4px}
+  /* badge */
+  .st{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;line-height:1.5;border:1px solid;font-weight:500}
+  .st.gray{color:#86909c;background:#f2f3f5;border-color:#e5e6eb}
+  .st.warn{color:#ff7d00;background:#fff7e8;border-color:#ffe4ba}
+  .st.fail{color:#f53f3f;background:#ffeded;border-color:#fdc8c8}
+  .st.ok{color:#00b42a;background:#e8f8e8;border-color:#b7e8b7}
+  .st.info{color:#165dff;background:#e8f3ff;border-color:#bedaff}
+  .st.purple{color:#7c3aed;background:#f5f3ff;border-color:#ede9fe}
+  /* pagination */
+  .pg-bar{display:flex;align-items:center;padding:14px 4px 4px;font-size:13px;color:#4e5969}
+  .pg-bar .info{margin-right:auto;color:#86909c}
+  .pg-bar .pg{min-width:32px;height:32px;line-height:30px;text-align:center;padding:0 10px;border:1px solid #e5e6eb;border-radius:6px;cursor:pointer;background:#fff;margin-left:6px;transition:all .15s ease}
+  .pg-bar .pg:hover{color:#165dff;border-color:#165dff;box-shadow:0 2px 4px rgba(22,93,255,.08)}
+  .pg-bar .pg.active{background:linear-gradient(135deg,#165dff,#4080ff);border-color:#165dff;color:#fff;box-shadow:0 2px 6px rgba(22,93,255,.25)}
+  /* dialog */
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .mask.show{display:flex}
+  .dlg{background:#fff;border-radius:10px;width:720px;max-width:92vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.22);animation:slideUp .25s ease}
+  .dlg.wide{width:880px}
+  .dlg-head{padding:18px 24px;border-bottom:1px solid #f0f1f3;display:flex;align-items:center}
+  .dlg-head h3{font-size:16px;font-weight:600;color:#1d2129;display:flex;align-items:center;gap:8px}
+  .dlg-head h3::before{content:'';width:3px;height:16px;background:#165dff;border-radius:2px}
+  .dlg-head .close{margin-left:auto;cursor:pointer;color:#86909c;font-size:18px;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;transition:all .15s ease}
+  .dlg-head .close:hover{color:#f53f3f;background:#fff1f0}
+  .dlg-body{padding:22px 24px;overflow:auto;flex:1}
+  .dlg-foot{padding:14px 24px;border-top:1px solid #f0f1f3;display:flex;justify-content:flex-end;gap:10px;background:#fafbfc}
+  /* form */
+  .form{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 18px}
+  .form .full{grid-column:1/-1}
+  .form .fg{display:flex;flex-direction:column;gap:4px}
+  .form .fg .lbl{font-size:13px;color:#4e5969;font-weight:500;display:flex;align-items:center;gap:2px}
+  .form .fg .lbl .req{color:#f53f3f}
+  .form .fg .ipt,.form .fg .sel{width:100%}
+  .form .fg .help{font-size:12px;color:#86909c;margin-top:2px}
+  /* sql editor */
+  .sql-edit{background:#1e1e1e;color:#d4d4d4;padding:14px 16px;border-radius:6px;font-family:"Cascadia Code",Consolas,monospace;font-size:13px;line-height:1.7;border:1px solid #1e1e1e;width:100%;min-height:280px;resize:vertical;outline:none;white-space:pre;overflow:auto}
+  .sql-edit:focus{box-shadow:0 0 0 3px rgba(22,93,255,.18)}
+  /* sql layout */
+  .sql-layout{display:flex;gap:16px;min-height:600px}
+  .sql-list{width:280px;flex-shrink:0;background:#fff;border:1px solid #ebedf0;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(31,35,41,.05)}
+  .sql-list-head{padding:14px 16px;border-bottom:1px solid #f0f1f3;background:#fafbfc}
+  .sql-list-search{width:100%}
+  .sql-list-body{overflow:auto;flex:1}
+  .sql-list-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid #f5f5f5;transition:background .15s ease}
+  .sql-list-item:hover{background:#f7faff}
+  .sql-list-item.active{background:#e8f3ff;border-left:3px solid #165dff}
+  .sql-list-item .nm{font-size:13px;color:#1d2129;font-weight:500;margin-bottom:4px}
+  .sql-list-item .cd{font-size:11px;color:#86909c;font-family:"Cascadia Code",Consolas,monospace}
+  .sql-list-item .mt{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+  .sql-detail{flex:1;background:#fff;border:1px solid #ebedf0;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(31,35,41,.05)}
+  .sql-detail-head{padding:16px 20px;border-bottom:1px solid #f0f1f3;background:#fafbfc;display:flex;align-items:center;gap:12px}
+  .sql-detail-head .tt{font-size:15px;color:#1d2129;font-weight:600}
+  .sql-detail-head .cd{color:#86909c;font-size:12px;font-family:"Cascadia Code",Consolas,monospace}
+  .sql-detail-head .right{margin-left:auto;display:flex;gap:8px}
+  /* acquire bar */
+  .acquire-bar{display:flex;align-items:center;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#f7faff,#f0f5ff);border:1px solid #d9e7ff;border-radius:8px;margin-bottom:18px;box-shadow:0 2px 6px rgba(22,93,255,.05)}
+  .acquire-bar .ipt,.acquire-bar .sel{min-width:160px;background:#fff}
+  .acquire-bar .lbl{color:#4e5969;font-size:13px;font-weight:500}
+  .acquire-bar .right{margin-left:auto}
+  /* summary */
+  .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+  .summary .cell{background:#fff;padding:16px 20px;border-radius:8px;border:1px solid #ebedf0;box-shadow:0 2px 6px rgba(31,35,41,.04);transition:all .2s ease}
+  .summary .cell:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(31,35,41,.1);border-color:#d9e1f0}
+  .summary .cell .lbl{font-size:12px;color:#86909c;margin-bottom:6px}
+  .summary .cell .val{font-size:18px;color:#1d2129;font-weight:600;line-height:1.3}
+  .summary .cell.ok .val{color:#00b42a}
+  .summary .cell.warn .val{color:#ff7d00}
+  /* test result */
+  .test-result{margin-top:14px;background:#1e1e1e;color:#d4d4d4;padding:14px 16px;border-radius:6px;font-family:"Cascadia Code",Consolas,monospace;font-size:12px;line-height:1.7;max-height:320px;overflow:auto;white-space:pre}
+  .test-result .ts{color:#569cd6}
+  .test-result .ok{color:#4ec9b0;font-weight:600}
+  .test-result .err{color:#f48771;font-weight:600}
+  .test-result .k{color:#c586c0}
+  .param-form{background:#fafbfc;border:1px solid #ebedf0;border-radius:6px;padding:14px 16px}
+  .param-form .row{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+  .param-form .row:last-child{margin-bottom:0}
+  /* empty */
+  .empty{padding:40px 0;text-align:center;color:#c9cdd4;font-size:13px}
+  .empty .ic{font-size:28px;margin-bottom:6px;opacity:.5}
+  /* toast */
+  .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);padding:10px 22px;background:rgba(0,0,0,.85);color:#fff;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s ease;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px}
+  .toast.show{opacity:1}
+  .toast.success{background:rgba(0,180,42,.95)}
+  .toast.error{background:rgba(245,63,63,.95)}
+  /* upload zone */
+  .upload-zone{border:2px dashed #d9e7ff;border-radius:8px;padding:24px;text-align:center;background:#fafbfc;transition:all .2s ease}
+  .upload-zone:hover{border-color:#165dff;background:#f0f5ff}
+  .upload-zone .ic{font-size:32px;color:#86909c;margin-bottom:8px}
+  .upload-zone .tt{font-size:14px;color:#1d2129;margin-bottom:4px;font-weight:500}
+  .upload-zone .sub{font-size:12px;color:#86909c}
+  /* batch block */
+  .b-block{border:1px solid #e5e6eb;border-radius:6px;padding:16px;margin-bottom:14px}
+  .b-block h4{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:14px}
+  .b-block h4 .idx{width:24px;height:24px;border-radius:50%;background:#e8f3ff;color:#165dff;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:12px}
+  .b-block .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .b-block .gf{background:#fafbfc;border:1px solid #f2f3f5;border-radius:4px;padding:8px 12px}
+  .b-block .gf .lbl{font-size:11px;color:#86909c;margin-bottom:4px}
+  .b-block .gf .val{font-size:13px;color:#1d2129;font-weight:500}
+  .b-block .res{background:#fafbfc;border:1px solid #f2f3f5;border-radius:4px;padding:10px 12px;margin-top:10px;min-height:56px;font-size:12px;color:#4e5969;white-space:pre-wrap;word-break:break-all}
+  /* voucher expand */
+  .v-det td{background:#fafbfc!important;padding:0}
+  .v-det-inner{padding:12px 18px;background:#fafbfc;border-top:1px dashed #e5e6eb;font-size:12px}
+  .v-det-inner .ttl{color:#4e5969;margin-bottom:8px}
+  .kv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 16px;color:#4e5969}
+  .kv-grid .kv .k{color:#86909c;margin-right:4px}
+  .kv-grid .kv .v{color:#1d2129;font-family:"Cascadia Code",Consolas,monospace}
+  /* info card */
+  .info-card{background:linear-gradient(135deg,#f7faff,#f0f5ff);border:1px solid #d9e7ff;border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:#1d2129}
+  .info-card .item{display:flex;flex-direction:column;gap:2px}
+  .info-card .item .lbl{font-size:11px;color:#86909c}
+  .info-card .item .val{font-size:14px;font-weight:600;color:#1d2129}
+  /* merge compare */
+  .merge-compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+  .merge-compare .src{border:1px solid #e5e6eb;border-radius:6px;padding:12px;background:#fafbfc}
+  .merge-compare .src .hd{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:13px;font-weight:500}
+  .merge-compare .src .hd .dot{width:8px;height:8px;border-radius:50%}
+  .merge-compare .src.tbl{table style="width:100%"}
+  .merge-compare .src .nm{color:#86909c;font-size:11px;margin-bottom:8px}
+  .merge-compare .src.ok{border-color:#b7e8b7;background:#e8f8e8}
+  .merge-compare .src.warn{border-color:#ffd9b3;background:#fff7e8}
+  .merge-compare .src.err{border-color:#fdc8c8;background:#ffeded}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><b>智能财务月结系统</b></div>
+  <div class="crumb">月结管理 / <b id="crumbMain">结转二</b></div>
+  <div class="user">
+    <span>W8406768@XZ</span>
+    <div class="av">黄</div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sg-title">九大业务自动化</div>
+    <div class="mi" data-page="biz" data-code="settle01">结转一</div>
+    <div class="mi active" data-page="biz" data-code="settle02">结转二</div>
+    <div class="mi" data-page="biz" data-code="settle03">非现金流</div>
+    <div class="mi" data-page="biz" data-code="settle04">滞纳金</div>
+    <div class="mi" data-page="biz" data-code="settle05">呆坏账</div>
+    <div class="mi" data-page="biz" data-code="settle06">欠费 <span class="tag">B类</span></div>
+    <div class="mi" data-page="biz" data-code="settle07">坏账计提 <span class="tag">B类</span></div>
+    <div class="mi" data-page="biz" data-code="settle08">营业款</div>
+    <div class="mi" data-page="biz" data-code="settle09">预存款</div>
+
+    <div class="sg-title" style="margin-top:10px;">基础配置</div>
+    <div class="mi" data-page="dsm">数据源管理</div>
+    <div class="mi" data-page="sql">SQL 模板</div>
+    <div class="mi" data-page="proc">加工脚本配置</div>
+    <div class="mi" data-page="sap">SAP 字段字典</div>
+    <div class="mi" data-page="acct">科目 / 利润中心</div>
+    <div class="mi" data-page="bcdict">业务编码字典</div>
+
+    <div class="sg-title" style="margin-top:10px;">系统</div>
+    <div class="mi" data-page="oplog">操作日志</div>
+    <div class="mi" data-page="snap">业务快照</div>
+  </aside>
+
+  <main class="content">
+    <div id="root"></div>
+  </main>
+</div>
+
+<!-- dialogs -->
+<div class="mask" id="dlgAudit"><div class="dlg" style="width:520px;">
+  <div class="dlg-head"><h3>数据详情</h3><span class="close" onclick="closeDlg('dlgAudit')">✕</span></div>
+  <div class="dlg-body"><div class="summary" style="grid-template-columns:repeat(2,1fr);" id="dlgAuditBody"></div>
+  <div style="margin-top:14px;padding:10px 12px;background:#f7f8fa;border-radius:4px;color:#4e5969;font-size:13px;">
+    💡 审核请使用工具栏的 <b style="color:#165dff;">批量审核</b> 按账期一次性处理
+  </div></div>
+  <div class="dlg-foot"><button class="btn primary" onclick="closeDlg('dlgAudit')">关闭</button>
+    <button class="btn danger" onclick="auditConfirm(0)">仅驳回此条</button></div>
+</div></div>
+
+<div class="mask" id="dlgBatch"><div class="dlg" style="width:560px;">
+  <div class="dlg-head"><h3>批量审核 — 本次账单</h3><span class="close" onclick="closeDlg('dlgBatch')">✕</span></div>
+  <div class="dlg-body" id="dlgBatchBody"></div>
+  <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgBatch')">取消</button>
+    <button class="btn danger" onclick="batchConfirm(0)">✗ 全部驳回</button>
+    <button class="btn success" onclick="batchConfirm(1)">✓ 全部通过</button></div>
+</div></div>
+
+<div class="mask" id="dlgPost"><div class="dlg">
+  <div class="dlg-head"><h3>过账详情</h3><span class="close" onclick="closeDlg('dlgPost')">✕</span></div>
+  <div class="dlg-body"><div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+    <div style="font-weight:600;font-size:14px;">批次明细</div>
+    <div style="color:#86909c;font-size:13px;">共 <b id="dlgPostCnt" style="color:#1d2129;">2</b> 条</div></div>
+    <div id="dlgPostBody"></div></div>
+  <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgPost')">关闭</button>
+    <button class="btn primary" onclick="toast('已重新过账','success');closeDlg('dlgPost')">🔁 重新过账</button></div>
+</div></div>
+
+<!-- 数据源编辑/新增弹窗 -->
+<div class="mask" id="dlgDSME"><div class="dlg" style="width:620px;">
+  <div class="dlg-head"><h3 id="dlgDSMETitle">新增数据源</h3><span class="close" onclick="closeDlg('dlgDSME')">✕</span></div>
+  <div class="dlg-body" id="dlgDSMEBody">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;">
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">编码 <span style="color:#f53f3f;">*</span></div>
+        <input class="ipt block" id="dsmCode" placeholder="如 ads_mysql, master, slave" />
+      </div>
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">名称 <span style="color:#f53f3f;">*</span></div>
+        <input class="ipt block" id="dsmName" placeholder="如 数据门户(广告库)" />
+      </div>
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">数据库类型 <span style="color:#f53f3f;">*</span></div>
+        <select class="sel block" id="dsmType">
+          <option value="MYSQL">MYSQL</option>
+          <option value="POSTGRESQL">POSTGRESQL</option>
+          <option value="DORIS">DORIS</option>
+          <option value="REDIS">REDIS</option>
+        </select>
+      </div>
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">分组 <span style="color:#f53f3f;">*</span></div>
+        <select class="sel block" id="dsmGroup">
+          <option value="数据门户">数据门户</option>
+          <option value="业务生产">业务生产</option>
+          <option value="SAP凭证库">SAP凭证库</option>
+          <option value="缓存/其它">缓存/其它</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1;"><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">JDBC URL <span style="color:#f53f3f;">*</span></div>
+        <input class="ipt block mono" id="dsmUrl" placeholder="jdbc:mysql://host:port/database 或 redis://host:port/db" />
+      </div>
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">用户名</div>
+        <input class="ipt block" id="dsmUser" placeholder="数据库登录用户" />
+      </div>
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">密码 <span id="dsmPwdHint" style="color:#86909c;font-weight:400;">(留空表示不修改)</span></div>
+        <input class="ipt block" type="password" id="dsmPwd" placeholder="数据库密码" />
+      </div>
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">连接池 - 最小</div>
+        <input class="ipt block" type="number" id="dsmPoolMin" value="2" min="0" />
+      </div>
+      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">连接池 - 最大</div>
+        <input class="ipt block" type="number" id="dsmPoolMax" value="8" min="1" />
+      </div>
+      <div style="grid-column:1/-1;"><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">备注</div>
+        <input class="ipt block" id="dsmRemark" placeholder="数据源用途说明" />
+      </div>
+      <div style="grid-column:1/-1;display:flex;gap:18px;align-items:center;padding:10px 12px;background:#f7f8fa;border-radius:4px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#1d2129;">
+          <input type="checkbox" id="dsmState" checked /> 启用
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#1d2129;">
+          <input type="checkbox" id="dsmTest" checked /> 保存时立即测试连接
+        </label>
+        <span style="color:#86909c;font-size:12px;">· 测试失败仍可保存为禁用状态</span>
+      </div>
+    </div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn" onclick="closeDlg('dlgDSME')">取消</button>
+    <button class="btn warn" onclick="testDSME()">🧪 测试连接</button>
+    <button class="btn primary" onclick="saveDSME()">💾 保存</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====================== 全局数据 ======================
+const BIZ = {
+  settle01: {
+    name:'结转一', code:'000010008', take:'A 类(单源)',
+    source:'ads_db.ads_report_yysr_month', period:'202608',
+    pmNames:['支付宝付款','充值卡','网上客服银行卡','微信付款'],
+    sql_acquire:'settle01_acquire', sql_voucher:'settle01_voucher',
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:325000000,qd_name:'支付宝付款',fee_type:'营收资金',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 98000000,qd_name:'充值卡',fee_type:'营收资金',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:187000000,qd_name:'网上客服银行卡',fee_type:'营收资金',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee:234000000,qd_name:'支付宝付款',fee_type:'营收资金',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee: 43000000,qd_name:'充值卡',fee_type:'营收资金',st:'待审核'}
+    ],
+    v1:[
+      {batch:'A026202608000010008',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'26年8月结转1',hkont:'8054000001',koart:'D',shkzg:'H',waers:'CNY',amt:6100000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000010008',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'26年8月结转1',hkont:'G954000016',koart:'K',shkzg:'S',waers:'CNY',amt:6100000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle02: {
+    name:'结转二', code:'000020009', take:'A 类(单源)',
+    source:'ads_db.ads_report_jzbb_month', period:'202608',
+    pmNames:['支付宝付款','充值卡','网上客服银行卡','微信付款','VC预存'],
+    sql_acquire:'settle02_acquire', sql_voucher:'settle02_voucher',
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:980754100,qd_name:'支付宝付款',fee_type:'冲减后预存',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:123456700,qd_name:'充值卡',fee_type:'冲减后预存',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:245678900,qd_name:'网上客服银行卡',fee_type:'冲减后预存',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:345678900,qd_name:'微信付款',fee_type:'冲减后预存',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee:606846100,qd_name:'支付宝付款',fee_type:'冲减后预存',st:'待审核'}
+    ],
+    v1:[
+      {batch:'A026202608000020009',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'26年8月结转2',hkont:'8054000003',koart:'D',shkzg:'H',waers:'CNY',amt:9807541.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'B026202608000020009',sub:'001',red:'3',buk:'B026',gj:'2026',mo:'08',txt:'26年8月结转2',hkont:'8054000003',koart:'D',shkzg:'H',waers:'CNY',amt:6068461.00,prctr:'B540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000020009',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'26年8月结转2',hkont:'G954000017',koart:'K',shkzg:'S',waers:'CNY',amt:9807541.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'B026202608000020009',sub:'001',red:'4',buk:'B026',gj:'2026',mo:'08',txt:'26年8月结转2',hkont:'G954000017',koart:'K',shkzg:'S',waers:'CNY',amt:6068461.00,prctr:'B540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle03: {
+    name:'非现金流', code:'000030007', take:'A 类(单源)',
+    source:'ads_db.ads_report_yysr_month', period:'202608',
+    pmNames:['内部转账','外部代收','银行手续费冲回'],
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:150000000,qd_name:'内部转账',fee_type:'非现金',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee: 80000000,qd_name:'外部代收',fee_type:'非现金',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 12000000,qd_name:'银行手续费冲回',fee_type:'非现金',st:'待审核'}
+    ],
+    v1:[
+      {batch:'A026202608000030007',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'非现金流',hkont:'8054000007',koart:'D',shkzg:'S',waers:'CNY',amt:1620000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000030007',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'非现金流',hkont:'G954000022',koart:'K',shkzg:'H',waers:'CNY',amt:1620000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle04: {
+    name:'滞纳金', code:'000040001', take:'A 类(单源)',
+    source:'ads_db.ads_report_zhinajin_month', period:'202608',
+    pmNames:['欠费1-3月','欠费3-6月','欠费6月+'],
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 32000000,qd_name:'欠费1-3月',fee_type:'滞纳金',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee: 18000000,qd_name:'欠费3-6月',fee_type:'滞纳金',st:'待审核'}
+    ],
+    v1:[
+      {batch:'A026202608000040001',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'滞纳金计提',hkont:'8054000011',koart:'D',shkzg:'S',waers:'CNY',amt:500000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000040001',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'滞纳金计提',hkont:'G954000031',koart:'K',shkzg:'H',waers:'CNY',amt:500000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle05: {
+    name:'呆坏账', code:'000050001', take:'A 类(单源)',
+    source:'ads_db.ads_report_dhdw_month', period:'202608',
+    pmNames:['1-2年20%','2-3年50%','3年+100%'],
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 85000000,qd_name:'1-2年20%',fee_type:'呆坏账',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee:124000000,qd_name:'2-3年50%',fee_type:'呆坏账',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 36000000,qd_name:'3年+100%',fee_type:'呆坏账',st:'待审核'}
+    ],
+    v1:[
+      {batch:'A026202608000050001',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'呆坏账计提',hkont:'8054000015',koart:'D',shkzg:'S',waers:'CNY',amt:2450000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000050001',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'呆坏账计提',hkont:'G954000035',koart:'K',shkzg:'H',waers:'CNY',amt:2450000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle06: {
+    name:'欠费', code:'000060001', take:'B 类(双源)',
+    source:'ads_db.ads_report_qf_month (省内) + 集团侧应收账款明细 (Excel上传)',
+    period:'202608',
+    pmNames:['0-3月','3-6月','6-12月','12月+'],
+    excel_files:[
+      {name:'集团_应收账款_202608_拉萨分公司.xlsx',uploader:'财务部/张敏',upload_time:'2026-09-20 14:22:11',rows:128,size:'2.4 MB',state:'解析成功',period:'202608'},
+      {name:'集团_应收账款_202607_拉萨分公司.xlsx',uploader:'财务部/张敏',upload_time:'2026-08-22 09:15:33',rows:124,size:'2.3 MB',state:'解析成功',period:'202607'}
+    ],
+    excel_data:[
+      {id:1,period:'202608',local:891,user_id:'U8910001',area:1,age:'0-3月',fee_qf:  480000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'},
+      {id:2,period:'202608',local:891,user_id:'U8910002',area:1,age:'0-3月',fee_qf: 1250000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'},
+      {id:3,period:'202608',local:891,user_id:'U8910003',area:1,age:'3-6月',fee_qf: 2100000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'},
+      {id:4,period:'202608',local:891,user_id:'U8910004',area:1,age:'3-6月',fee_qf:  860000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'},
+      {id:5,period:'202608',local:891,user_id:'U8910005',area:1,age:'6-12月',fee_qf: 1200000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'},
+      {id:6,period:'202608',local:891,user_id:'U8910006',area:1,age:'12月+',fee_qf:  980000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'},
+      {id:7,period:'202608',local:891,user_id:'U8910007',area:1,age:'0-3月',fee_qf:    12000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'},
+      {id:8,period:'202608',local:891,user_id:'U8910008',area:1,age:'6-12月',fee_qf:  620000.00,source:'集团侧',parse:'成功',ts:'2026-09-20 14:22:11',st:'待审核'}
+    ],
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:1250000000,qd_name:'0-3月',fee_type:'欠费省内',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 480000000,qd_name:'3-6月',fee_type:'欠费省内',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee: 320000000,qd_name:'6-12月',fee_type:'欠费省内',st:'待审核'}
+    ],
+    excel_required:true,
+    v1:[
+      {batch:'A026202608000060001',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'欠费分账计提',hkont:'8054000019',koart:'D',shkzg:'S',waers:'CNY',amt:20500000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000060001',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'欠费分账计提',hkont:'G954000041',koart:'K',shkzg:'H',waers:'CNY',amt:20500000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle07: {
+    name:'坏账计提', code:'000070001', take:'B 类(双源)',
+    source:'ads_db.ads_report_qf_month (省内) + 集团侧坏账计提明细 (Excel上传)',
+    period:'202608',
+    pmNames:['1-2年20%','2-3年50%','3年+100%'],
+    excel_files:[
+      {name:'集团_坏账计提_202608_拉萨分公司.xlsx',uploader:'财务部/李莉',upload_time:'2026-09-20 15:11:42',rows:96,size:'1.8 MB',state:'解析成功',period:'202608'},
+      {name:'集团_坏账计提_202607_拉萨分公司.xlsx',uploader:'财务部/李莉',upload_time:'2026-08-22 10:33:09',rows:94,size:'1.7 MB',state:'解析成功',period:'202607'}
+    ],
+    excel_data:[
+      {id:1,period:'202608',local:891,user_id:'U8910001',area:1,age:'1-2年',fee_qf:  920000.00,rate:'20%',source:'集团侧',parse:'成功',ts:'2026-09-20 15:11:42',st:'待审核'},
+      {id:2,period:'202608',local:891,user_id:'U8910002',area:1,age:'1-2年',fee_qf: 1450000.00,rate:'20%',source:'集团侧',parse:'成功',ts:'2026-09-20 15:11:42',st:'待审核'},
+      {id:3,period:'202608',local:891,user_id:'U8910003',area:1,age:'2-3年',fee_qf: 1780000.00,rate:'50%',source:'集团侧',parse:'成功',ts:'2026-09-20 15:11:42',st:'待审核'},
+      {id:4,period:'202608',local:891,user_id:'U8910004',area:1,age:'2-3年',fee_qf:  720000.00,rate:'50%',source:'集团侧',parse:'成功',ts:'2026-09-20 15:11:42',st:'待审核'},
+      {id:5,period:'202608',local:891,user_id:'U8910005',area:1,age:'3年+',fee_qf:  560000.00,rate:'100%',source:'集团侧',parse:'成功',ts:'2026-09-20 15:11:42',st:'待审核'},
+      {id:6,period:'202608',local:891,user_id:'U8910006',area:1,age:'3年+',fee_qf: 1240000.00,rate:'100%',source:'集团侧',parse:'成功',ts:'2026-09-20 15:11:42',st:'待审核'}
+    ],
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 92000000,qd_name:'1-2年20%',fee_type:'坏账计提省内',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee:145000000,qd_name:'2-3年50%',fee_type:'坏账计提省内',st:'待审核'}
+    ],
+    excel_required:true,
+    v1:[
+      {batch:'A026202608000070001',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'坏账计提',hkont:'8054000021',koart:'D',shkzg:'S',waers:'CNY',amt:2370000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000070001',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'坏账计提',hkont:'G954000043',koart:'K',shkzg:'H',waers:'CNY',amt:2370000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle08: {
+    name:'营业款', code:'000080001', take:'A 类(多接口)',
+    source:'ads_db.ads_report_jfye + ads_db.ads_report_28dz (计费余额 + 28到账)',
+    period:'202608',
+    pmNames:['计费余额','28到账'],
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee:1560000000,qd_name:'计费余额',fee_type:'营业款',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee: 980000000,qd_name:'28到账',fee_type:'营业款',st:'待审核'}
+    ],
+    v1:[
+      {batch:'A026202608000080001',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'营业款',hkont:'8054000025',koart:'D',shkzg:'S',waers:'CNY',amt:25400000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000080001',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'营业款',hkont:'G954000051',koart:'K',shkzg:'H',waers:'CNY',amt:25400000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  },
+  settle09: {
+    name:'预存款', code:'000090001', take:'A 类(多接口)',
+    source:'ads_db.ads_report_jfye + ads_db.ads_report_28dz (计费余额 + 28到账)',
+    period:'202608',
+    pmNames:['充值','使用'],
+    t1:[
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:1,fee: 650000000,qd_name:'充值',fee_type:'预存款',st:'待审核'},
+      {month_no:'202608',local_id:891,area_id:1,cdma_flag:0,fee: 420000000,qd_name:'使用',fee_type:'预存款',st:'待审核'}
+    ],
+    v1:[
+      {batch:'A026202608000090001',sub:'001',red:'1',buk:'A026',gj:'2026',mo:'08',txt:'预存款',hkont:'8054000029',koart:'D',shkzg:'S',waers:'CNY',amt:10700000.00,prctr:'A540100',budat:'20260831',st:'待审核'},
+      {batch:'A026202608000090001',sub:'001',red:'2',buk:'A026',gj:'2026',mo:'08',txt:'预存款',hkont:'G954000061',koart:'K',shkzg:'H',waers:'CNY',amt:10700000.00,prctr:'A540100',budat:'20260831',st:'待审核'}
+    ]
+  }
+};
+
+const EDA_DATA = [
+  {mid:'EDA@891;20260522113430;05569;01',file:'DAPM_MSS_INCOME.20260317.202509.02.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'-',ts:'2026-05-22 11:34:30',c:'未采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'},
+  {mid:'EDA@891;20260512155533;77358;01',file:'DAPM_MSS_INCOME.20260317.202509.02.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'B0262025090000098',ts:'2026-05-12 15:55:33',c:'通知失败',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'},
+  {mid:'EDA@891;20260317094844;84679;01',file:'DAPM_MSS_INCOME.20260317.202509.02.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'B0262025090000098',ts:'2026-03-17 09:48:44',c:'通知失败',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'},
+  {mid:'EDA@891;20260311144937;58628;01',file:'DAPM_MSS_INCOME.20260311.202509.06.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'-',ts:'2026-03-11 14:49:37',c:'未采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'},
+  {mid:'EDA@891;20260311140908;03429;01',file:'DAPM_MSS_INCOME.20260311.202509.06.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'-',ts:'2026-03-11 14:09:08',c:'未采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'}
+];
+
+const DSM = [
+  {id:1,code:'ads_mysql',name:'数据门户(广告库)',db_type:'MYSQL',jdbc_url:'jdbc:mysql://10.18.0.21:3306/ads_db',username:'ads_reader',pool_min:2,pool_max:8,group:'数据门户',state:1,update_time:'2026-09-12 14:23:11'},
+  {id:2,code:'master',name:'主库 - 业务生产',db_type:'MYSQL',jdbc_url:'jdbc:mysql://10.18.0.11:3306/caiwu_chu_zhang',username:'caiwu_app',pool_min:4,pool_max:16,group:'业务生产',state:1,update_time:'2026-09-20 11:32:09'},
+  {id:3,code:'slave',name:'从库 - 业务查询',db_type:'MYSQL',jdbc_url:'jdbc:mysql://10.18.0.12:3306/caiwu_chu_zhang',username:'caiwu_query',pool_min:2,pool_max:8,group:'业务生产',state:1,update_time:'2026-09-20 11:32:09'},
+  {id:4,code:'pg_sap',name:'SAP 凭证库',db_type:'POSTGRESQL',jdbc_url:'jdbc:postgresql://10.18.0.31:5432/sap_bi',username:'sap_reader',pool_min:2,pool_max:8,group:'SAP凭证库',state:1,update_time:'2026-08-12 11:00:00'},
+  {id:5,code:'doris_ads',name:'Doris 数仓 - ADS 层',db_type:'DORIS',jdbc_url:'jdbc:mysql://10.18.0.41:9030/ads_doris',username:'doris_reader',pool_min:2,pool_max:8,group:'数据门户',state:1,update_time:'2026-09-22 10:15:33'},
+  {id:6,code:'redis_cache',name:'Redis 缓存',db_type:'REDIS',jdbc_url:'redis://10.18.0.51:6379/0',username:'-',pool_min:1,pool_max:4,group:'缓存/其它',state:0,update_time:'2026-09-18 16:42:01'}
+];
+
+const SQL_TPLS = [
+  {id:1,code:'settle01_acquire',name:'结转一 - 取数',ds_code:'ads_mysql',sql_type:'COMPOSITE',version:5,state:1,
+   sql_text:'DROP TABLE IF EXISTS temp_settle01_yj_#{period};\nCREATE TABLE temp_settle01_yj_#{period} (...);\nINSERT INTO temp_settle01_yj_#{period}\nSELECT month_no, local_id, f_fee_xacct*100, f_payment_method_name\nFROM ads_db.ads_report_yysr_month\nWHERE month_no=#{period} AND f_payment_method_name IN (#{pmNames});\nSELECT * FROM temp_settle01_yj_#{period};',
+   params:[{name:'period',label:'账期',type:'STRING',required:true,ui:'MONTH_PICKER',change_freq:'MONTHLY'},{name:'pmNames',label:'付款方式',type:'LIST',required:true,ui:'MULTI_SELECT',change_freq:'MONTHLY'}],
+   history:[{version:5,operator:'W8406768@XZ',operate_time:'2026-09-18 15:42:11'},{version:4,operator:'admin',operate_time:'2026-09-08 16:01:33'}]},
+  {id:2,code:'settle02_acquire',name:'结转二 - 取数',ds_code:'ads_mysql',sql_type:'COMPOSITE',version:8,state:1,
+   sql_text:'DROP TABLE IF EXISTS temp_settle02_yj_#{period};\nCREATE TABLE temp_settle02_yj_#{period} (...);\nINSERT INTO temp_settle02_yj_#{period}\nSELECT month_no, local_id, area_id, 1 cdma_flag, f_fee_xacct*100, f_qd_name, f_fee_type\nFROM ads_db.ads_report_jzbb_month WHERE month_no=#{period} AND f_payment_method_name IN (#{pmNames})\nUNION ALL\nSELECT ..., 0 cdma_flag FROM ads_db.ads_report_jzbb_month WHERE c_payment_method_name IN (#{pmNames});\nSELECT * FROM temp_settle02_yj_#{period};',
+   params:[{name:'period',label:'账期',type:'STRING',required:true,ui:'MONTH_PICKER',change_freq:'MONTHLY'},{name:'pmNames',label:'付款方式',type:'LIST',required:true,ui:'MULTI_SELECT',change_freq:'MONTHLY'}],
+   history:[{version:8,operator:'W8406768@XZ',operate_time:'2026-09-16 14:23:50'},{version:7,operator:'admin',operate_time:'2026-09-10 09:32:11'}]},
+  {id:3,code:'settle02_voucher',name:'结转二 - 凭证组装',ds_code:'master',sql_type:'QUERY',version:12,state:1,
+   sql_text:'WITH base_data AS (\n  SELECT cdma_flag, SUM(fee)/100 AS total_fee, ... FROM temp_settle02_yj_#{period} GROUP BY cdma_flag\n)\nSELECT concat(\'A026\',#{period},\'000020009\') AS BATCHID, ...\nFROM base_data WHERE cdma_flag=1\nUNION ALL SELECT ... WHERE cdma_flag=0 ...',
+   params:[{name:'period',label:'账期',type:'STRING',required:true,ui:'MONTH_PICKER',change_freq:'MONTHLY'}],
+   history:[{version:12,operator:'W8406768@XZ',operate_time:'2026-09-20 09:11:33'}]},
+  {id:4,code:'settle03_acquire',name:'非现金流 - 取数',ds_code:'ads_mysql',sql_type:'COMPOSITE',version:3,state:1,
+   sql_text:'DROP TABLE IF EXISTS temp_settle03_#{period};\nCREATE TABLE temp_settle03_#{period} (...);\nINSERT INTO temp_settle03_#{period} SELECT ... WHERE month_no=#{period};\nSELECT * FROM temp_settle03_#{period};',
+   params:[{name:'period',label:'账期',type:'STRING',required:true,ui:'MONTH_PICKER',change_freq:'MONTHLY'}],
+   history:[{version:3,operator:'admin',operate_time:'2026-09-10 16:01:22'}]},
+  {id:5,code:'settle04_acquire',name:'滞纳金 - 取数',ds_code:'ads_mysql',sql_type:'COMPOSITE',version:2,state:1,
+   sql_text:'DROP TABLE IF EXISTS temp_settle04_#{period};\nCREATE TABLE temp_settle04_#{period} (...);\nINSERT INTO temp_settle04_#{period} SELECT ...;\nSELECT * FROM temp_settle04_#{period};',
+   params:[{name:'period',label:'账期',type:'STRING',required:true,ui:'MONTH_PICKER',change_freq:'MONTHLY'}],
+   history:[{version:2,operator:'admin',operate_time:'2026-08-30 10:32:11'}]}
+];
+
+const SAP_FIELDS = [
+  {code:'BATCHID',name:'批次号',type:'VARCHAR(20)',required:true,note:'凭证级批次号,concat(BUKRS,monthNo,bizCode)',status:1},
+  {code:'SUBID',name:'子凭证号',type:'VARCHAR(3)',required:true,note:'固定 001',status:1},
+  {code:'REDID',name:'行号',type:'VARCHAR(2)',required:true,note:'1/2/3/4 借贷方向',status:1},
+  {code:'BUKRS',name:'公司代码',type:'VARCHAR(4)',required:true,note:'A026 / B026',status:1},
+  {code:'GJAHR',name:'会计年度',type:'VARCHAR(4)',required:true,note:'substr(monthNo,1,4)',status:1},
+  {code:'MONAT',name:'会计期间',type:'VARCHAR(2)',required:true,note:'substr(monthNo,5,2)',status:1},
+  {code:'BKTXT',name:'凭证抬头文本',type:'VARCHAR(25)',required:true,note:'如 26年8月结转2',status:1},
+  {code:'HKONT',name:'会计科目',type:'VARCHAR(18)',required:true,note:'来自 account_map',status:1},
+  {code:'KOART',name:'科目类型',type:'CHAR(1)',required:true,note:'D=客户/K=供应商',status:1},
+  {code:'SHBK1',name:'特别总账标识',type:'CHAR(1)',required:false,note:'',status:1},
+  {code:'SHKZG',name:'借贷标识',type:'CHAR(1)',required:true,note:'S=借/H=贷',status:1},
+  {code:'WAERS',name:'货币码',type:'CHAR(3)',required:true,note:'CNY',status:1},
+  {code:'BWRBTR',name:'本币金额(分)',type:'DECIMAL(23,4)',required:true,note:'金额×100 转分',status:1},
+  {code:'PRCTR',name:'利润中心',type:'VARCHAR(10)',required:true,note:'A540100/B540100',status:1},
+  {code:'SSGTXT',name:'行项目文本',type:'VARCHAR(50)',required:true,note:'转XX分公司业务说明',status:1},
+  {code:'BUDAT',name:'凭证日期',type:'VARCHAR(8)',required:true,note:'账期月末',status:1},
+  {code:'USNAM',name:'用户名',type:'VARCHAR(20)',required:true,note:'环境参数 #{#_user_id}',status:1},
+  {code:'HKONT1',name:'备抵科目',type:'VARCHAR(18)',required:false,note:'借方行使用',status:1}
+];
+
+const ACCT_MAP = [
+  {biz:'结转一',condition:'cdma_flag=0',hkont:'8054000001',koart:'D',remark:'贷方-收入结转'},
+  {biz:'结转一',condition:'cdma_flag=1',hkont:'8054000002',koart:'D',remark:'贷方-收入结转'},
+  {biz:'结转二',condition:'cdma_flag=0',hkont:'8054000003',koart:'D',remark:'贷方-营业款结转'},
+  {biz:'结转二',condition:'cdma_flag=1',hkont:'8054000004',koart:'D',remark:'贷方-营业款结转'},
+  {biz:'结转二',condition:'S 借方',hkont:'G954000017',koart:'K',remark:'借方-银存冲减'},
+  {biz:'非现金流',condition:'cdma_flag=0',hkont:'8054000007',koart:'D',remark:'贷方-非现金'},
+  {biz:'滞纳金',condition:'默认',hkont:'8054000011',koart:'D',remark:'贷方-滞纳金计提'},
+  {biz:'呆坏账',condition:'默认',hkont:'8054000015',koart:'D',remark:'贷方-呆坏账计提'},
+  {biz:'欠费',condition:'默认',hkont:'8054000019',koart:'D',remark:'贷方-欠费分账'},
+  {biz:'坏账计提',condition:'默认',hkont:'8054000021',koart:'D',remark:'贷方-坏账计提'},
+  {biz:'营业款',condition:'默认',hkont:'8054000025',koart:'D',remark:'贷方-营业款'},
+  {biz:'预存款',condition:'默认',hkont:'8054000029',koart:'D',remark:'贷方-预存款'}
+];
+
+const BC_DICT = [
+  {biz:'结转一',code:'000010008',remark:'借:应收账款/银存 贷:主营业务收入',status:1},
+  {biz:'结转二',code:'000020009',remark:'一借一贷一借一贷 4 行结构',status:1},
+  {biz:'非现金流',code:'000030007',remark:'内部转账 + 外部代收',status:1},
+  {biz:'滞纳金',code:'000040001',remark:'按欠费段计提',status:1},
+  {biz:'呆坏账',code:'000050001',remark:'账龄段比例计提',status:1},
+  {biz:'欠费',code:'000060001',remark:'B 类-双源合并',status:1},
+  {biz:'坏账计提',code:'000070001',remark:'B 类-双源合并',status:1},
+  {biz:'营业款',code:'000080001',remark:'计费余额 + 28 到账',status:1},
+  {biz:'预存款',code:'000090001',remark:'充值/使用流水 + 余额',status:1}
+];
+
+const PROC_SCRIPTS = [
+  {id:1,biz:'结转一',biz_code:'settle01',code:'settle01_voucher',name:'结转一 - 凭证组装',ds_code:'master',sql_type:'QUERY',version:3,state:1,
+   remark:'2 行借贷凭证(结转一)',
+   update_time:'2026-09-18 11:42:11',update_by:'admin',
+   input_table:'temp_settle01_yj_#{period}',
+   inputs:['temp_settle01_yj_#{period}','pmNames','period'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','SSGTXT','BUDAT','USNAM'],
+   sql_text:'WITH base AS (\n  SELECT cdma_flag, SUM(fee_xacct)/100 AS total_fee\n  FROM temp_settle01_yj_#{period}\n  GROUP BY cdma_flag\n)\nSELECT concat(\'A026\',#{period},\'000010008\') BATCHID, \'001\' SUBID, 1 REDID, \'A026\' BUKRS, ...\nFROM base WHERE cdma_flag=1\nUNION ALL\nSELECT ..., 2 REDID, \'B026\' BUKRS, ... FROM base WHERE cdma_flag=0;',
+   history:[{version:3,operator:'admin',operate_time:'2026-09-18 11:42:11'},{version:2,operator:'admin',operate_time:'2026-09-10 09:12:11'}]},
+  {id:2,biz:'结转二',biz_code:'settle02',code:'settle02_voucher',name:'结转二 - 凭证组装',ds_code:'master',sql_type:'QUERY',version:12,state:1,
+   remark:'4 行借贷(A026+B026,一借一贷一借一贷)',
+   update_time:'2026-09-20 09:11:33',update_by:'W8406768@XZ',
+   input_table:'temp_settle02_yj_#{period}',
+   inputs:['temp_settle02_yj_#{period}','period'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHBK1','SHKZG','WAERS','BWRBTR','PRCTR','HKONT1','SSGTXT','BUDAT','USNAM'],
+   sql_text:'WITH base_data AS (\n  SELECT cdma_flag, SUM(fee_xacct+fee_stored+fee_dhz)/100 AS total_fee, ...\n  FROM temp_settle02_yj_#{period}\n  WHERE pmd_name IN (\'充值:用户缴费\',\'邮政代收\',\'充值卡\')\n  GROUP BY cdma_flag HAVING SUM(...) > 0\n)\nSELECT concat(\'A026\',#{period},\'000020009\') BATCHID, \'001\' SUBID, 1 REDID, \'A026\' BUKRS, ...\nFROM base_data WHERE cdma_flag=1\nUNION ALL SELECT ..., 2 REDID, \'B026\' BUKRS, ... FROM base_data WHERE cdma_flag=0\nUNION ALL SELECT ..., 3 REDID, \'A026\' BUKRS, \'G954000017\' HKONT, \'S\' SHKZG, ... FROM base_data WHERE cdma_flag=1\nUNION ALL SELECT ..., 4 REDID, \'B026\' BUKRS, \'G954000017\' HKONT, \'S\' SHKZG, ... FROM base_data WHERE cdma_flag=0;',
+   history:[{version:12,operator:'W8406768@XZ',operate_time:'2026-09-20 09:11:33'},{version:11,operator:'admin',operate_time:'2026-09-12 14:42:11'}]},
+  {id:3,biz:'非现金流',biz_code:'settle03',code:'settle03_voucher',name:'非现金流 - 凭证组装',ds_code:'master',sql_type:'QUERY',version:4,state:1,
+   remark:'内部转账 + 外部代收(2 行借贷)',
+   update_time:'2026-09-15 16:01:22',update_by:'admin',
+   input_table:'temp_settle03_#{period}',
+   inputs:['temp_settle03_#{period}','period'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','BUDAT','USNAM'],
+   sql_text:'SELECT concat(\'A026\',#{period},\'000030007\') BATCHID, \'001\' SUBID, 1 REDID, \'A026\' BUKRS, ...\nFROM temp_settle03_#{period};',
+   history:[{version:4,operator:'admin',operate_time:'2026-09-15 16:01:22'}]},
+  {id:4,biz:'滞纳金',biz_code:'settle04',code:'settle04_voucher',name:'滞纳金 - 凭证组装',ds_code:'master',sql_type:'QUERY',version:2,state:1,
+   remark:'按欠费段计提(2 行借贷)',
+   update_time:'2026-08-30 10:32:11',update_by:'admin',
+   input_table:'temp_settle04_#{period}',
+   inputs:['temp_settle04_#{period}','period'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','BUDAT','USNAM'],
+   sql_text:'SELECT concat(\'A026\',#{period},\'000040001\') BATCHID, ...\nFROM temp_settle04_#{period} WHERE age_segment IN (\'1-3月\',\'3-6月\');',
+   history:[{version:2,operator:'admin',operate_time:'2026-08-30 10:32:11'}]},
+  {id:5,biz:'呆坏账',biz_code:'settle05',code:'settle05_voucher',name:'呆坏账 - 凭证组装',ds_code:'master',sql_type:'QUERY',version:3,state:1,
+   remark:'账龄段比例(1-2年20%/2-3年50%/3年+100%)',
+   update_time:'2026-09-10 16:01:22',update_by:'admin',
+   input_table:'temp_settle05_#{period}',
+   inputs:['temp_settle05_#{period}','period'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','BUDAT','USNAM'],
+   sql_text:'SELECT concat(\'A026\',#{period},\'000050001\') BATCHID, ...\nFROM (\n  SELECT age_segment, SUM(fee_bad*rate) AS total FROM temp_settle05_#{period} GROUP BY age_segment\n) t;',
+   history:[{version:3,operator:'admin',operate_time:'2026-09-10 16:01:22'}]},
+  {id:6,biz:'欠费',biz_code:'settle06',code:'settle06_voucher',name:'欠费 - 凭证组装(双源合并)',ds_code:'master',sql_type:'QUERY',version:5,state:1,
+   remark:'B 类-省内源+集团侧 Excel 合并,按账龄段(2 行借贷)',
+   update_time:'2026-09-19 11:22:01',update_by:'W8406768@XZ',
+   input_table:'temp_settle06_merge_#{period} (合并后)',
+   inputs:['temp_settle06_merge_#{period}','period','merge_strategy=excel_priority'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','BUDAT','USNAM'],
+   sql_text:'WITH merged AS (\n  -- 以集团侧 Excel 为准,合并省内源\n  SELECT user_id, fee_qf, age FROM temp_settle06_merge_#{period}\n)\nSELECT concat(\'A026\',#{period},\'000060001\') BATCHID, ...\nFROM (\n  SELECT age, SUM(fee_qf) AS total FROM merged GROUP BY age\n) t WHERE age IN (\'0-3月\',\'3-6月\',\'6-12月\',\'12月+\');',
+   history:[{version:5,operator:'W8406768@XZ',operate_time:'2026-09-19 11:22:01'}]},
+  {id:7,biz:'坏账计提',biz_code:'settle07',code:'settle07_voucher',name:'坏账计提 - 凭证组装(双源合并)',ds_code:'master',sql_type:'QUERY',version:4,state:1,
+   remark:'B 类-省内源+集团侧坏账计提合并,账龄段比例(2 行借贷)',
+   update_time:'2026-09-19 11:33:45',update_by:'W8406768@XZ',
+   input_table:'temp_settle07_merge_#{period} (合并后)',
+   inputs:['temp_settle07_merge_#{period}','period','merge_strategy=excel_priority'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','BUDAT','USNAM'],
+   sql_text:'WITH merged AS (\n  SELECT user_id, fee_qf, rate FROM temp_settle07_merge_#{period}\n)\nSELECT concat(\'A026\',#{period},\'000070001\') BATCHID, ...\nFROM (\n  SELECT age, SUM(fee_qf*rate) AS total FROM merged GROUP BY age\n) t WHERE age IN (\'1-2年\',\'2-3年\',\'3年+\');',
+   history:[{version:4,operator:'W8406768@XZ',operate_time:'2026-09-19 11:33:45'}]},
+  {id:8,biz:'营业款',biz_code:'settle08',code:'settle08_voucher',name:'营业款 - 凭证组装(多接口)',ds_code:'master',sql_type:'QUERY',version:6,state:1,
+   remark:'A 类-多接口,计费余额+28到账合并(2 行借贷)',
+   update_time:'2026-09-18 10:00:11',update_by:'admin',
+   input_table:'v_settle08_balance_arrival_#{period} (合并视图)',
+   inputs:['v_settle08_balance_arrival_#{period}','period'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','BUDAT','USNAM'],
+   sql_text:'SELECT concat(\'A026\',#{period},\'000080001\') BATCHID, ...\nFROM (\n  SELECT SUM(balance-arrival) AS diff FROM v_settle08_balance_arrival_#{period}\n) t;',
+   history:[{version:6,operator:'admin',operate_time:'2026-09-18 10:00:11'}]},
+  {id:9,biz:'预存款',biz_code:'settle09',code:'settle09_voucher',name:'预存款 - 凭证组装(多接口)',ds_code:'master',sql_type:'QUERY',version:5,state:1,
+   remark:'A 类-多接口,充值/使用流水(2 行借贷)',
+   update_time:'2026-09-17 14:22:33',update_by:'admin',
+   input_table:'v_settle09_balance_#{period} (合并视图)',
+   inputs:['v_settle09_balance_#{period}','period'],
+   outputs:['BATCHID','SUBID','REDID','BUKRS','GJAHR','MONAT','BKTXT','HKONT','KOART','SHKZG','WAERS','BWRBTR','PRCTR','BUDAT','USNAM'],
+   sql_text:'SELECT concat(\'A026\',#{period},\'000090001\') BATCHID, ...\nFROM (\n  SELECT type, SUM(amount) AS total FROM v_settle09_balance_#{period} GROUP BY type\n) t;',
+   history:[{version:5,operator:'admin',operate_time:'2026-09-17 14:22:33'}]}
+];
+
+const OP_LOGS = [
+  {ts:'2026-09-22 10:54:21',user:'W8406768@XZ',module:'结转二',op:'试跑 SQL 模板 settle02_acquire',ip:'10.18.0.99',status:'成功',cost:'241ms',trace:'tr_20260922105421@891'},
+  {ts:'2026-09-22 10:48:33',user:'W8406768@XZ',module:'数据源管理',op:'修改数据源 master 连接池(4-16 → 2-8)',ip:'10.18.0.99',status:'成功',cost:'83ms',trace:'tr_20260922104833@891'},
+  {ts:'2026-09-22 10:32:11',user:'admin',module:'SQL 模板',op:'保存 settle02_voucher 至 v12',ip:'10.18.0.50',status:'成功',cost:'156ms',trace:'tr_20260922103211@891'},
+  {ts:'2026-09-22 10:11:22',user:'W8406768@XZ',module:'结转二',op:'批量审核通过 10 条 (账期 202608)',ip:'10.18.0.99',status:'成功',cost:'421ms',trace:'tr_20260922101122@891'},
+  {ts:'2026-09-22 09:55:33',user:'admin',module:'结转一',op:'执行取数 settle01_acquire',ip:'10.18.0.50',status:'失败',cost:'12s',trace:'tr_20260922095533@891',err:'ORA-00942 表或视图不存在'},
+  {ts:'2026-09-22 09:42:01',user:'W8406768@XZ',module:'数据源管理',op:'禁用 redis_cache 数据源',ip:'10.18.0.99',status:'成功',cost:'23ms',trace:'tr_20260922094201@891'},
+  {ts:'2026-09-22 09:11:33',user:'W8406768@XZ',module:'SAP 字段字典',op:'编辑字段 HKONT1 备注',ip:'10.18.0.99',status:'成功',cost:'34ms',trace:'tr_20260922091133@891'},
+  {ts:'2026-09-21 18:33:11',user:'admin',module:'系统',op:'登录系统',ip:'10.18.0.50',status:'成功',cost:'-',trace:'tr_20260921183311@891'},
+  {ts:'2026-09-21 16:22:01',user:'W8406768@XZ',module:'结转二',op:'执行凭证组装 settle02_voucher',ip:'10.18.0.99',status:'成功',cost:'1.42s',trace:'tr_20260921162201@891'},
+  {ts:'2026-09-21 14:05:30',user:'admin',module:'业务快照',op:'查询 OSS 归档列表',ip:'10.18.0.50',status:'成功',cost:'211ms',trace:'tr_20260921140530@891'}
+];
+
+const SNAPSHOTS = [
+  {trace:'tr_20260922101122@891',biz:'结转二',type:'VOUCHER',period:'202608',size:'3.2 KB',time:'2026-09-22 10:11:22',user:'W8406768@XZ'},
+  {trace:'tr_20260922101122@891',biz:'结转二',type:'PROCESS',period:'202608',size:'128 KB',time:'2026-09-22 10:11:18',user:'W8406768@XZ'},
+  {trace:'tr_20260922101122@891',biz:'结转二',type:'SOURCE',period:'202608',size:'45 MB',time:'2026-09-22 10:11:01',user:'W8406768@XZ'},
+  {trace:'tr_20260922101122@891',biz:'结转二',type:'TEMP_TABLE',period:'202608',size:'2.1 MB',time:'2026-09-22 10:11:08',user:'W8406768@XZ'},
+  {trace:'tr_20260921162201@891',biz:'结转二',type:'VOUCHER',period:'202608',size:'3.1 KB',time:'2026-09-21 16:22:01',user:'W8406768@XZ'},
+  {trace:'tr_20260921162201@891',biz:'结转二',type:'PUSH',period:'202608',size:'5.6 KB',time:'2026-09-21 16:22:13',user:'W8406768@XZ'},
+  {trace:'tr_20260921095533@891',biz:'结转一',type:'SOURCE',period:'202608',size:'-',time:'2026-09-22 09:55:33',user:'admin'},
+  {trace:'tr_20260920093211@891',biz:'结转二',type:'PROCESS',period:'202608',size:'128 KB',time:'2026-09-20 09:32:11',user:'admin'}
+];
+
+// ====================== 通用工具 ======================
+function fmt(n,d=2){return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function st(t,k='gray'){return `<span class="st ${k}">${t}</span>`}
+let _tt=null;
+function toast(msg,k=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+k;if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),1800)}
+function closeDlg(id){document.getElementById(id).classList.remove('show')}
+
+// ====================== 菜单切换 ======================
+function goMenu(page, code){
+  document.querySelectorAll('.sidebar .mi').forEach(el=>el.classList.remove('active'));
+  const target=document.querySelector(`.sidebar .mi[data-page="${page}"][data-code="${code||''}"]`) ||
+               document.querySelector(`.sidebar .mi[data-page="${page}"]:not([data-code])`);
+  if(target)target.classList.add('active');
+  if(page==='biz') renderBiz(code);
+  else if(page==='dsm') renderDSM();
+  else if(page==='sql') renderSQLList();
+  else if(page==='proc') renderProc();
+  else if(page==='sap') renderSAP();
+  else if(page==='acct') renderAcct();
+  else if(page==='bcdict') renderBCDict();
+  else if(page==='oplog') renderOpLog();
+  else if(page==='snap') renderSnap();
+  if(target){
+    const txt = target.textContent.trim();
+    document.getElementById('crumbMain').textContent = txt;
+  }
+}
+document.querySelectorAll('.sidebar .mi').forEach(el=>{
+  el.addEventListener('click',()=>goMenu(el.dataset.page, el.dataset.code));
+});
+
+// ====================== 九大业务页面 ======================
+let curBiz='settle02';
+let auditTarget=null;
+const expanded={};
+
+function renderBiz(code){
+  curBiz=code;
+  const b=BIZ[code];
+  document.getElementById('root').innerHTML = `
+    <div class="panel">
+      <div class="tab-nav">
+        <div class="tab-nav-item active" onclick="switchBizTab('t1',this)">获取数据与展示</div>
+        ${b.excel_required ? `<div class="tab-nav-item" onclick="switchBizTab('excel',this)">Excel 上传与审核</div>` : ''}
+        <div class="tab-nav-item" onclick="switchBizTab('t2',this)">加工数据与凭证</div>
+        <div class="tab-nav-item" onclick="switchBizTab('t3',this)">上传 EDA 与过账审核</div>
+      </div>
+      <div class="tab-pane active" id="biz-t1">
+        ${b.excel_required ? renderExcelUpload(b) : ''}
+        <div class="acquire-bar">
+          <div class="field"><span class="lbl">账期</span><input class="ipt" value="${b.period}" /></div>
+          <div class="field"><span class="lbl">数据源</span><select class="sel"><option>ads_db (数据门户)</option></select></div>
+          <div class="field"><span class="lbl">SQL 模板</span><select class="sel"><option>${b.sql_acquire||b.code+'_acquire'}</option></select></div>
+          <div class="right"><button class="btn primary" onclick="doAcquire()">▶ 开始取数</button></div>
+        </div>
+        <div class="filter-bar">
+          <div class="field"><span class="lbl">账期</span><input class="ipt" value="${b.period}" /></div>
+          <div class="field"><span class="lbl">本地网</span><select class="sel"><option>全部</option><option>891</option></select></div>
+          <div class="field"><span class="lbl">金额</span><input class="ipt sm" placeholder="最小" style="min-width:90px;"/> — <input class="ipt sm" placeholder="最大" style="min-width:90px;"/></div>
+          <div class="grow"></div>
+          <button class="btn warn" onclick="openBatchAudit()" style="padding:7px 18px;font-weight:500;">📋 审核 · 待审核 <b id="t1Pending">0</b> 条</button>
+          <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
+          <button class="btn" onclick="renderT1()">🔄 刷新</button>
+        </div>
+        <div class="tbl"><table>
+          <thead><tr>
+            <th style="width:40px;">#</th><th>month_no<br><span style="font-weight:400;color:#86909c;">账期</span></th>
+            <th>local_id<br><span style="font-weight:400;color:#86909c;">本地网</span></th>
+            <th>area_id<br><span style="font-weight:400;color:#86909c;">营业区ID</span></th>
+            <th>cdma_flag<br><span style="font-weight:400;color:#86909c;">主体</span></th>
+            <th class="num">fee<br><span style="font-weight:400;color:#86909c;">金额(分)</span></th>
+            <th>qd_name<br><span style="font-weight:400;color:#86909c;">类型</span></th>
+            <th>fee_type<br><span style="font-weight:400;color:#86909c;">备注</span></th>
+            <th>状态</th>
+          </tr></thead>
+          <tbody id="t1Body"></tbody>
+        </table></div>
+        <div class="pg-bar">
+          <span class="info">共 <b id="t1Total">0</b> 条</span>
+          <span class="pg">‹</span><span class="pg active">1</span><span class="pg">›</span>
+        </div>
+      </div>
+      ${b.excel_required ? `<div class="tab-pane" id="biz-excel">
+        <div class="acquire-bar">
+          <div style="display:flex;align-items:center;gap:10px;color:#4e5969;font-size:13px;">
+            <span style="font-size:18px;">📤</span>
+            <span>集团侧数据(<b style="color:#1d2129;">${b.name}</b> · 账期 <b style="color:#1d2129;">${b.period}</b>)需财务人员手工上传 Excel,系统解析后进入审核流程</span>
+          </div>
+          <div class="right">
+            <button class="btn" onclick="toast('已下载 excel_template_def 模板','success')">📥 下载模板</button>
+            <button class="btn warn" onclick="simulateUpload()">📤 上传 Excel</button>
+          </div>
+        </div>
+        <!-- 上传区域 -->
+        <div class="upload-zone" style="margin-bottom:18px;">
+          <div class="ic">📂</div>
+          <div class="tt">点击或拖拽 Excel 文件到此区域上传</div>
+          <div class="sub">支持 .xlsx / .xls 格式 · 单文件 ≤ 10MB · 模板字段定义见 excel_template_def</div>
+        </div>
+        <!-- 已上传文件列表 -->
+        <div style="font-size:13px;color:#4e5969;font-weight:500;margin-bottom:10px;">📁 已上传文件 (${b.excel_files.length})</div>
+        <div class="tbl" style="margin-bottom:18px;max-height:auto;"><table>
+          <thead><tr>
+            <th style="width:40px;">#</th><th>文件名</th><th>账期</th><th>上传人</th><th>上传时间</th>
+            <th>解析行数</th><th>文件大小</th><th>解析状态</th><th style="width:120px;">操作</th>
+          </tr></thead>
+          <tbody>${b.excel_files.map((f,i)=>`
+            <tr>
+              <td class="center">${i+1}</td>
+              <td><span class="mono">${f.name}</span></td>
+              <td>${f.period}</td>
+              <td>${f.uploader}</td>
+              <td>${f.upload_time}</td>
+              <td class="center">${f.rows}</td>
+              <td>${f.size}</td>
+              <td>${stEl(f.state,'ok')}</td>
+              <td class="op"><button class="btn sm link" onclick="toast('查看文件','success')">查看</button><button class="btn sm link" style="color:#f53f3f;" onclick="toast('已删除','success')">删除</button></td>
+            </tr>
+          `).join('')}</tbody>
+        </table></div>
+        <!-- 解析后数据 -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:13px;color:#4e5969;font-weight:500;">📋 Excel 解析后数据 (待审核) — 共 <b id="excelTotal">${b.excel_data.length}</b> 条</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn warn" onclick="openBatchExcelAudit()" style="padding:7px 18px;font-weight:500;">📋 审核 · 待审核 <b id="excelPending">0</b> 条</button>
+            <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
+          </div>
+        </div>
+        <div class="tbl"><table>
+          <thead><tr>
+            <th style="width:40px;">#</th><th>账期</th><th>本地网</th><th>营业区</th><th>用户ID</th>
+            <th>账龄段</th><th>金额(元)</th>${b.code==='000070001'?'<th>计提比例</th>':''}
+            <th>来源</th><th>解析</th><th>上传时间</th><th>审核状态</th>
+          </tr></thead>
+          <tbody id="excelBody"></tbody>
+        </table></div>
+      </div>` : ''}
+
+      <div class="tab-pane" id="biz-t2">
+        <div class="acquire-bar">
+          <div style="display:flex;align-items:center;gap:10px;color:#4e5969;font-size:13px;">
+            <span style="font-size:18px;">⚙️</span>
+            <span>系统将自动拉取加工 SQL 脚本(<b style="color:#1d2129;">${b.sql_voucher||b.code+'_voucher'}</b>),按合并规则将<b style="color:#1d2129;">省内源</b>与<b style="color:#1d2129;">集团侧 Excel</b>合并,加工账期 <b style="color:#1d2129;">${b.period}</b> 的数据</span>
+          </div>
+          <div class="right"><button class="btn primary" onclick="doCompose()">⚙ 开始数据加工</button></div>
+        </div>
+        ${b.excel_required ? renderMergeBox(b) : ''}
+        <div class="summary" id="sumBox"></div>
+        <div class="filter-bar">
+          <div class="field"><span class="lbl">BATCHID</span><input class="ipt" placeholder="${b.code.toUpperCase()+b.period+code.toUpperCase().slice(-3)+'00'}" /></div>
+          <div class="field"><span class="lbl">借贷</span><select class="sel"><option>全部</option><option>贷 H</option><option>借 S</option></select></div>
+          <div class="grow"></div>
+          <button class="btn" onclick="toast('已导出 SAP 报文','success')">📥 导出</button>
+          <button class="btn" onclick="renderT2()">🔄 刷新</button>
+        </div>
+        <div class="tbl"><table>
+          <thead><tr>
+            <th style="width:30px;"></th><th>BATCHID</th><th>SUBID</th><th>REDID</th><th>BUKRS</th>
+            <th>GJAHR</th><th>MONAT</th><th>BKTXT</th><th>HKONT</th><th>KOART</th>
+            <th>SHKZG</th><th>WAERS</th><th>BWRBTR(分)</th><th>PRCTR</th><th>BUDAT</th>
+            <th>状态</th>
+          </tr></thead>
+          <tbody id="t2Body"></tbody>
+        </table></div>
+      </div>
+      <div class="tab-pane" id="biz-t3">
+        <div class="acquire-bar">
+          <div class="field"><span class="lbl">扫描目录</span><input class="ipt" value="/data/program/src/zyg/file" style="min-width:280px;" /></div>
+          <div class="right">
+            <button class="btn primary" onclick="addEda();toast('已生成 SAP 报文文件','success')">生成文件</button>
+            <button class="btn" onclick="toast('扫描完成','success')">重新扫描</button>
+            <button class="btn" onclick="toast('已发起采集请求','success')">请求采集</button>
+            <button class="btn" onclick="renderT3()">🔄 刷新</button>
+          </div>
+        </div>
+        <div class="sub-nav">
+          <div class="sub-nav-item" data-sub="s1" onclick="switchSub('s1',this)">生成文件日志</div>
+          <div class="sub-nav-item" data-sub="s2" onclick="switchSub('s2',this)">待扫描/上传文件</div>
+          <div class="sub-nav-item active" data-sub="s3" onclick="switchSub('s3',this)">上传记录</div>
+        </div>
+        <div class="sub-pane" id="s1">
+          <div class="tbl"><table>
+            <thead><tr><th style="width:40px;">#</th><th>批次号</th><th>文件名</th><th>生成时间</th><th>凭证行数</th><th>文件大小</th><th style="width:100px;">操作</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td class="mono">A026${b.period}000020009</td><td class="mono">A026_${b.period}_000020009_20260916120000.DAT</td><td>2026-09-16 12:00:00</td><td class="num">4</td><td class="num">3.2 KB</td><td class="op"><button class="btn sm link">查看</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td></tr>
+              <tr><td>2</td><td class="mono">B026${b.period}000020009</td><td class="mono">B026_${b.period}_000020009_20260916120000.DAT</td><td>2026-09-16 12:00:00</td><td class="num">4</td><td class="num">3.1 KB</td><td class="op"><button class="btn sm link">查看</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="sub-pane" id="s2"><div class="empty"><div class="ic">📂</div>当前目录下无可上传文件</div></div>
+        <div class="sub-pane active" id="s3">
+          <div class="filter-bar">
+            <div class="field"><span class="lbl">关键字</span><input class="ipt" placeholder="消息id / 文件名" id="kw3" /></div>
+            <div class="field"><span class="lbl">采集状态</span><select class="sel" id="fltSt"><option>全部</option><option>通知失败</option><option>已采集</option></select></div>
+            <div class="grow"></div>
+            <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
+          </div>
+          <div class="tbl"><table>
+            <thead><tr>
+              <th>消息id</th><th>文件名</th><th>批次号</th><th>上传时间</th>
+              <th>采集状态</th><th>解析1</th><th>解析2</th><th>入库效验</th>
+              <th style="width:90px;">操作</th>
+            </tr></thead>
+            <tbody id="t3Body"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  `;
+  renderT1();
+  renderT2();
+  renderT3();
+  if(BIZ[code].excel_required) renderExcel();
+}
+
+function renderExcelUpload(b){
+  return `
+    <div style="margin-bottom:14px;padding:14px 18px;background:#fff7e8;border:1px solid #ffe4ba;border-radius:8px;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:24px;">📊</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;color:#1d2129;font-weight:500;">⚠ 本业务为 B 类(双源取数型),需先上传集团侧 Excel 文件</div>
+        <div style="font-size:12px;color:#86909c;margin-top:2px;">数据源:${b.source}</div>
+      </div>
+      <button class="btn warn" onclick="simulateUpload()">📤 上传合并源(集团侧)</button>
+    </div>
+  `;
+}
+
+function switchBizTab(id, el){
+  el.parentElement.querySelectorAll('.tab-nav-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#root .tab-pane').forEach(x=>x.classList.remove('active'));
+  document.getElementById('biz-'+id).classList.add('active');
+}
+function switchSub(id, el){
+  el.parentElement.querySelectorAll('.sub-nav-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#root .sub-pane').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderT1(){
+  const tb=document.getElementById('t1Body');
+  if(!tb)return;
+  const b=BIZ[curBiz];
+  tb.innerHTML = b.t1.map((r,i)=>`
+    <tr>
+      <td class="center">${i+1}</td>
+      <td>${r.month_no}</td>
+      <td>${r.local_id}</td>
+      <td>${r.area_id}</td>
+      <td>${r.cdma_flag}</td>
+      <td class="num">${fmt(r.fee,0)}</td>
+      <td>${r.qd_name}</td>
+      <td>${r.fee_type}</td>
+      <td>${st(r.st,r.st==='已通过'?'ok':(r.st==='已驳回'?'fail':'warn'))}</td>
+    </tr>
+  `).join('');
+  document.getElementById('t1Total').textContent=b.t1.length;
+  const pe=document.getElementById('t1Pending');
+  if(pe)pe.textContent=b.t1.filter(r=>r.st==='待审核').length;
+}
+
+function renderExcel(){
+  const tb=document.getElementById('excelBody');
+  if(!tb)return;
+  const b=BIZ[curBiz];
+  const hasRate=b.code==='000070001';
+  tb.innerHTML = b.excel_data.map((r,i)=>`
+    <tr>
+      <td class="center">${i+1}</td>
+      <td>${r.period}</td>
+      <td>${r.local}</td>
+      <td>${r.area}</td>
+      <td><span class="mono">${r.user_id}</span></td>
+      <td>${st(r.age,'info')}</td>
+      <td class="num">${fmt(r.fee_qf)}</td>
+      ${hasRate?`<td>${st(r.rate,'warn')}</td>`:''}
+      <td>${st(r.source,'purple')}</td>
+      <td>${st(r.parse,'ok')}</td>
+      <td>${r.ts}</td>
+      <td>${st(r.st,r.st==='已通过'?'ok':(r.st==='已驳回'?'fail':'warn'))}</td>
+    </tr>
+  `).join('');
+  const te=document.getElementById('excelTotal');if(te)te.textContent=b.excel_data.length;
+  const pe=document.getElementById('excelPending');
+  if(pe)pe.textContent=b.excel_data.filter(r=>r.st==='待审核').length;
+}
+
+function simulateUpload(){
+  const b=BIZ[curBiz];
+  if(!b.excel_files)return;
+  const now=new Date();
+  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'2')}-${String(now.getDate()).padStart(2,'2')} ${String(now.getHours()).padStart(2,'2')}:${String(now.getMinutes()).padStart(2,'2')}:${String(now.getSeconds()).padStart(2,'2')}`;
+  const fname=`集团_${b.name}_${b.period}_拉萨分公司_${ts.replace(/[-: ]/g,'')}.xlsx`;
+  b.excel_files.unshift({name:fname,uploader:'财务部/演示用户',upload_time:ts,rows:b.excel_data.length,size:(1+Math.random()).toFixed(1)+' MB',state:'解析成功',period:b.period});
+  // 模拟几条新解析数据
+  for(let i=0;i<3;i++){
+    b.excel_data.unshift({
+      id:Date.now()+i,period:b.period,local:891,user_id:`U${8900000+Math.floor(Math.random()*9999)}`,area:1,
+      age:b.pmNames[i]||b.pmNames[0],fee_qf:Math.floor(Math.random()*500000+50000),
+      ...(b.code==='000070001'?{rate:'20%'}:{}),
+      source:'集团侧',parse:'成功',ts,st:'待审核'
+    });
+  }
+  if(curBiz===b.name && document.getElementById('excelBody')){
+    // 当前 Tab 不在 excel 上,只需更新 BIZ 数据
+  }
+  toast(`已上传 ${fname},解析 ${b.excel_data.length} 条数据`,'success');
+  // 重新渲染整个 biz 页面以更新列表
+  renderBiz(curBiz);
+}
+
+function renderMergeBox(b){
+  const t1SumFen=b.t1.reduce((s,r)=>s+r.fee,0);
+  const excelSumFen=b.excel_data.reduce((s,r)=>s+r.fee_qf*100,0);  // excel_data 还是元,转分
+  const finalSumFen=excelSumFen;
+  const t1Sum=t1SumFen/100;
+  const excelSum=excelSumFen/100;
+  const finalSum=finalSumFen/100;
+  return `
+    <div style="margin-bottom:18px;background:#fff;border:1px solid #ebedf0;border-radius:8px;padding:16px 20px;box-shadow:0 2px 6px rgba(31,35,41,.04);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:14px;color:#1d2129;font-weight:600;">📊 双源数据合并 — 账期 ${b.period}</div>
+        <div style="font-size:12px;color:#86909c;">合并规则:<b style="color:#1d2129;">以集团侧 Excel 源为准</b>(财务对账后修正) · 冲突时优先 Excel</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+        <div style="border:1px solid #e5e6eb;border-radius:6px;padding:14px;background:#fafbfc;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#165dff;"></div>
+            <div style="font-size:13px;font-weight:500;">① 省内源(数据门户自动)</div>
+          </div>
+          <div style="font-size:12px;color:#86909c;margin-bottom:6px;">数据源:ads_db</div>
+          <div style="font-size:12px;color:#86909c;margin-bottom:10px;">条数: <b style="color:#1d2129;">${b.t1.length}</b></div>
+          <div style="font-size:20px;color:#1d2129;font-weight:600;">${fmt(t1Sum)} <span style="font-size:12px;color:#86909c;font-weight:400;">元</span></div>
+          <div style="font-size:11px;color:#86909c;margin-top:4px;">(${fmt(t1SumFen,0)} 分)</div>
+        </div>
+        <div style="border:1px solid #b7e8b7;border-radius:6px;padding:14px;background:#e8f8e8;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#00b42a;"></div>
+            <div style="font-size:13px;font-weight:500;">② 集团侧(Excel上传)</div>
+          </div>
+          <div style="font-size:12px;color:#86909c;margin-bottom:6px;">来源:财务手工上传</div>
+          <div style="font-size:12px;color:#86909c;margin-bottom:10px;">条数: <b style="color:#1d2129;">${b.excel_data.length}</b></div>
+          <div style="font-size:20px;color:#1d2129;font-weight:600;">${fmt(excelSum)} <span style="font-size:12px;color:#86909c;font-weight:400;">元</span></div>
+          <div style="font-size:11px;color:#86909c;margin-top:4px;">(${fmt(excelSumFen,0)} 分)</div>
+        </div>
+        <div style="border:1px solid #7c3aed;border-radius:6px;padding:14px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#7c3aed;"></div>
+            <div style="font-size:13px;font-weight:500;color:#7c3aed;">③ 合并后(凭证源)</div>
+          </div>
+          <div style="font-size:12px;color:#86909c;margin-bottom:6px;">规则:<b style="color:#1d2129;">Excel 源为准</b></div>
+          <div style="font-size:12px;color:#86909c;margin-bottom:10px;">条数: <b style="color:#1d2129;">${b.excel_data.length}</b></div>
+          <div style="font-size:20px;color:#7c3aed;font-weight:600;">${fmt(finalSum)} <span style="font-size:12px;color:#86909c;font-weight:400;">元</span></div>
+          <div style="font-size:11px;color:#86909c;margin-top:4px;">(${fmt(finalSumFen,0)} 分)</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderT2(){
+  const tb=document.getElementById('t2Body');
+  if(!tb)return;
+  const b=BIZ[curBiz];
+  const totalH=b.v1.filter(r=>r.shkzg==='H').reduce((s,r)=>s+r.amt,0);
+  const totalS=b.v1.filter(r=>r.shkzg==='S').reduce((s,r)=>s+r.amt,0);
+  const batchSet=new Set(b.v1.map(r=>r.batch));
+  document.getElementById('sumBox').innerHTML=`
+    <div class="cell"><div class="lbl">凭证批数</div><div class="val">${batchSet.size}</div></div>
+    <div class="cell"><div class="lbl">凭证行数</div><div class="val">${b.v1.length}</div></div>
+    <div class="cell"><div class="lbl">贷方合计</div><div class="val">${fmt(totalH*100)} 分</div></div>
+    <div class="cell"><div class="lbl">借方合计</div><div class="val">${fmt(totalS*100)} 分</div></div>
+    <div class="cell ok"><div class="lbl">借贷平衡</div><div class="val">${Math.abs(totalH-totalS)<0.01?'✓ 平衡':'✗ 不平'}</div></div>
+  `;
+  tb.innerHTML = b.v1.map((r,i)=>`
+    <tr data-idx="${i}">
+      <td class="center" style="cursor:pointer;color:#165dff;" onclick="toggleVoucher(${i})">${expanded[i]?'▼':'▶'}</td>
+      <td><span class="mono">${r.batch}</span></td>
+      <td>${r.sub}</td>
+      <td class="center">${r.red}</td>
+      <td><span class="mono">${r.buk}</span></td>
+      <td>${r.gj}</td>
+      <td>${r.mo}</td>
+      <td>${r.txt}</td>
+      <td class="mono">${r.hkont}</td>
+      <td>${r.koart}</td>
+      <td>${st(r.shkzg==='H'?'贷 H':'借 S',r.shkzg==='H'?'ok':'warn')}</td>
+      <td>${r.waers}</td>
+      <td class="num">${fmt(r.amt*100)}</td>
+      <td>${r.prctr}</td>
+      <td>${r.budat}</td>
+      <td>${st(r.st,r.st==='已通过'?'ok':(r.st==='已驳回'?'fail':'warn'))}</td>
+    </tr>
+    <tr class="v-det" id="vd${i}" style="display:${expanded[i]?'table-row':'none'};">
+      <td colspan="17"><div class="v-det-inner">
+        <div class="ttl">📄 完整 45 字段 SAP 凭证行</div>
+        <div class="kv-grid">
+          <div class="kv"><span class="k">BATCHID:</span><span class="v">${r.batch}</span></div>
+          <div class="kv"><span class="k">BUKRS:</span><span class="v">${r.buk}</span></div>
+          <div class="kv"><span class="k">REDID:</span><span class="v">${r.red}</span></div>
+          <div class="kv"><span class="k">SHKZG:</span><span class="v">${r.shkzg}</span></div>
+          <div class="kv"><span class="k">HKONT:</span><span class="v">${r.hkont}</span></div>
+          <div class="kv"><span class="k">BWRBTR:</span><span class="v">${fmt(r.amt*100)}</span></div>
+          <div class="kv"><span class="k">PRCTR:</span><span class="v">${r.prctr}</span></div>
+          <div class="kv"><span class="k">BUDAT:</span><span class="v">${r.budat}</span></div>
+          <div class="kv"><span class="k">USNAM:</span><span class="v">W8406768@XZ</span></div>
+          <div class="kv"><span class="k">SSGTXT:</span><span class="v">转拉萨分公司${r.gj}年${r.mo}月${r.txt}</span></div>
+        </div>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function toggleVoucher(i){
+  expanded[i]=!expanded[i];
+  renderT2();
+}
+
+function renderT3(){
+  const tb=document.getElementById('t3Body');
+  if(!tb)return;
+  const kw=(document.getElementById('kw3')?.value||'').toLowerCase();
+  const st=(document.getElementById('fltSt')?.value||'全部');
+  let arr=EDA_DATA.slice();
+  if(kw)arr=arr.filter(r=>r.mid.toLowerCase().includes(kw)||r.file.toLowerCase().includes(kw));
+  if(st!=='全部')arr=arr.filter(r=>r.c===st);
+  if(!arr.length){tb.innerHTML=`<tr><td colspan="9" class="empty"><div class="ic">📭</div>无匹配记录</td></tr>`;return;}
+  tb.innerHTML=arr.map(r=>{
+    const fail=r.c==='通知失败';
+    return `<tr class="${fail?'fail':''}">
+      <td><span class="mono ellipsis" style="max-width:240px;" title="${r.mid}">${r.mid}</span></td>
+      <td><span class="mono ellipsis" style="max-width:240px;" title="${r.file}">${r.file}</span></td>
+      <td>${r.batch==='-'?'-':`<span class="mono ellipsis" style="max-width:140px;">${r.batch}</span>`}</td>
+      <td>${r.ts}</td>
+      <td>${stEl(r.c,r.c==='通知失败'?'fail':(r.c==='已采集'?'ok':'gray'))}</td>
+      <td>${stEl(r.p1,'warn')}</td>
+      <td>${stEl(r.p2,'warn')}</td>
+      <td>${stEl(r.v1,'warn')}</td>
+      <td class="op"><button class="btn sm link" onclick="showPosting()">查看过账</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function stEl(t,k){return `<span class="st ${k}">${t}</span>`}
+
+function showPosting(){
+  const bs=[{no:'B0262025090000098',vst:'-',ctime:'2026-03-11 14:55:41',result:'-'},{no:'B0262025090000097',vst:'-',ctime:'2026-03-11 14:55:41',result:'-'}];
+  document.getElementById('dlgPostCnt').textContent=bs.length;
+  document.getElementById('dlgPostBody').innerHTML=bs.map((b,i)=>`
+    <div class="b-block">
+      <h4><span class="idx">#${i+1}</span>批次号 ${b.no}</h4>
+      <div class="grid">
+        <div class="gf"><div class="lbl">批次号</div><div class="val">${b.no}</div></div>
+        <div class="gf"><div class="lbl">过账校验状态</div><div class="val">${stEl(b.vst,'gray')}</div></div>
+        <div class="gf"><div class="lbl">创建时间</div><div class="val">${b.ctime}</div></div>
+      </div>
+      <div class="res"><b style="color:#86909c;">过账结果:</b><br>${b.result||'-'}</div>
+    </div>
+  `).join('');
+  document.getElementById('dlgPost').classList.add('show');
+}
+
+function addEda(){
+  const now=new Date();
+  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  EDA_DATA.unshift({mid:`EDA@891;test;00001;01`,file:`DAPM_MSS_INCOME.${BIZ[curBiz].period}.202509.02.001.001.854.DAT`,path:'/data/program/src/zyg/file',batch:`A026${BIZ[curBiz].period}000020009`,ts,c:'已采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'});
+  renderT3();
+}
+
+function doAcquire(){toast(`取数完成,临时表 temp_${curBiz}_yj_${BIZ[curBiz].period}`,'success');renderT1()}
+function doCompose(){setTimeout(()=>{renderT2();toast('已生成凭证','success')},300)}
+
+function openAudit(tab,i){
+  auditTarget={tab,idx:i};
+  const b=BIZ[curBiz];
+  let r;
+  if(tab==='T1')r=b.t1[i];
+  else if(tab==='T2')r=b.v1[i];
+  else if(tab==='EXCEL')r=b.excel_data[i];
+  document.getElementById('dlgAuditBody').innerHTML = tab==='T1' ? `
+    <div class="cell"><div class="lbl">账期 month_no</div><div class="val">${r.month_no}</div></div>
+    <div class="cell"><div class="lbl">本地网 local_id</div><div class="val">${r.local_id}</div></div>
+    <div class="cell"><div class="lbl">营业区 area_id</div><div class="val">${r.area_id}</div></div>
+    <div class="cell"><div class="lbl">CDMA cdma_flag</div><div class="val">${r.cdma_flag}</div></div>
+    <div class="cell"><div class="lbl">金额 fee</div><div class="val">${fmt(r.fee/100,2)} 元 <span style="color:#86909c;font-size:11px;">(${fmt(r.fee,0)} 分)</span></div></div>
+    <div class="cell"><div class="lbl">渠道 qd_name</div><div class="val">${r.qd_name}</div></div>
+    <div class="cell"><div class="lbl">费用类型 fee_type</div><div class="val">${r.fee_type}</div></div>
+  ` : tab==='EXCEL' ? `
+    <div class="cell"><div class="lbl">账期</div><div class="val">${r.period}</div></div>
+    <div class="cell"><div class="lbl">本地网</div><div class="val">${r.local}</div></div>
+    <div class="cell"><div class="lbl">用户ID</div><div class="val mono">${r.user_id}</div></div>
+    <div class="cell"><div class="lbl">账龄段</div><div class="val">${r.age}</div></div>
+    <div class="cell"><div class="lbl">金额(元)</div><div class="val">${fmt(r.fee_qf)}</div></div>
+    ${r.rate?`<div class="cell"><div class="lbl">计提比例</div><div class="val">${r.rate}</div></div>`:`<div class="cell"><div class="lbl">来源</div><div class="val">${r.source}</div></div>`}
+  ` : `
+    <div class="cell"><div class="lbl">BATCHID</div><div class="val mono" style="font-size:12px;">${r.batch}</div></div>
+    <div class="cell"><div class="lbl">BUKRS</div><div class="val">${r.buk}</div></div>
+    <div class="cell"><div class="lbl">账期</div><div class="val">${r.gj}-${r.mo}</div></div>
+    <div class="cell"><div class="lbl">凭证行</div><div class="val">REDID=${r.red} ${r.shkzg==='H'?'贷':'借'}</div></div>
+    <div class="cell"><div class="lbl">科目</div><div class="val mono">${r.hkont}</div></div>
+    <div class="cell"><div class="lbl">金额(分)</div><div class="val">${fmt(r.amt*100)}</div></div>
+  `;
+  document.getElementById('dlgAudit').classList.add('show');
+}
+
+function auditConfirm(pass){
+  if(!auditTarget)return;
+  const b=BIZ[curBiz];
+  const tab=auditTarget.tab;
+  const arr=tab==='T1'?b.t1:(tab==='EXCEL'?b.excel_data:b.v1);
+  arr[auditTarget.idx].st=pass?'已通过':'已驳回';
+  auditTarget=null;
+  closeDlg('dlgAudit');
+  if(tab==='T1')renderT1();
+  else if(tab==='EXCEL')renderExcel();
+  else renderT2();
+  toast(pass?'已审核通过':'已驳回',pass?'success':'error');
+}
+
+function openBatchExcelAudit(){
+  const b=BIZ[curBiz];
+  const pending=b.excel_data.filter(r=>r.st==='待审核');
+  const totalAmt=pending.reduce((s,r)=>s+r.fee_qf,0);
+  document.getElementById('dlgBatchBody').innerHTML=`
+    <div class="summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
+      <div class="cell"><div class="lbl">账期</div><div class="val">${b.period}</div></div>
+      <div class="cell"><div class="lbl">待审核条数</div><div class="val">${pending.length}</div></div>
+      <div class="cell warn"><div class="lbl">待审核金额(元)</div><div class="val">${fmt(totalAmt)}</div></div>
+    </div>
+    <div style="color:#4e5969;margin-bottom:8px;font-size:13px;">来源: 集团侧 Excel 文件(已解析) · 仅处理"待审核"记录</div>
+    <div style="margin-top:12px;color:#86909c;font-size:12px;">⚠ 通过后将与省内源数据按合并规则处理(进入"加工数据与凭证")</div>
+  `;
+  document.getElementById('dlgBatch').classList.add('show');
+}
+
+function openBatchAudit(){
+  const b=BIZ[curBiz];
+  const pending=b.t1.filter(r=>r.st==='待审核');
+  const totalAmt=pending.reduce((s,r)=>s+r.fee,0);
+  document.getElementById('dlgBatchBody').innerHTML=`
+    <div class="summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
+      <div class="cell"><div class="lbl">账期</div><div class="val">${b.period}</div></div>
+      <div class="cell"><div class="lbl">待审核条数</div><div class="val">${pending.length}</div></div>
+      <div class="cell warn"><div class="lbl">待审核金额(元)</div><div class="val">${fmt(totalAmt)}</div></div>
+    </div>
+    <div style="color:#4e5969;margin-bottom:8px;font-size:13px;">筛选条件(只处理范围内):</div>
+    <div class="filter-bar" style="padding:0;">
+      <div class="field"><span class="lbl">本地网</span><select class="sel sm"><option>全部</option><option>891</option></select></div>
+      <div class="field"><span class="lbl">金额</span>
+        <input class="ipt sm" placeholder="最小" style="min-width:90px;"/>
+        <span style="color:#c9cdd4;">—</span>
+        <input class="ipt sm" placeholder="最大" style="min-width:90px;"/>
+      </div>
+    </div>
+    <div style="margin-top:12px;color:#86909c;font-size:12px;">⚠ 将作用于筛选范围内的所有"待审核"记录</div>
+  `;
+  document.getElementById('dlgBatch').classList.add('show');
+}
+
+function batchConfirm(pass){
+  const b=BIZ[curBiz];
+  let cnt=0;
+  b.t1.forEach(r=>{if(r.st==='待审核'){r.st=pass?'已通过':'已驳回';cnt++}});
+  closeDlg('dlgBatch');
+  renderT1();
+  toast(pass?`已批量通过 ${cnt} 条`:`已批量驳回 ${cnt} 条`,pass?'success':'error');
+}
+
+// ====================== 数据源管理 ======================
+function renderDSM(){
+  document.getElementById('root').innerHTML=`
+    <div class="panel">
+      <div class="filter-bar">
+        <div class="field"><span class="lbl">编码</span><input class="ipt" placeholder="如 ads_mysql" id="dsmKc" /></div>
+        <div class="field"><span class="lbl">名称</span><input class="ipt" placeholder="数据源名称" id="dsmKn" /></div>
+        <div class="field"><span class="lbl">类型</span><select class="sel" id="dsmKt"><option>全部</option><option>MYSQL</option><option>POSTGRESQL</option><option>DORIS</option><option>REDIS</option></select></div>
+        <div class="field"><span class="lbl">状态</span><select class="sel" id="dsmKs"><option>全部</option><option>启用</option><option>禁用</option></select></div>
+        <div class="grow"></div>
+        <button class="btn" onclick="renderDSMTb()">🔄 刷新</button>
+        <button class="btn primary" onclick="openDSME()">+ 新增数据源</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr>
+          <th style="width:40px;">#</th><th>编码</th><th>名称</th><th>类型</th><th>JDBC URL</th>
+          <th>用户名</th><th>连接池</th><th>分组</th><th>状态</th><th>更新时间</th>
+          <th style="width:180px;">操作</th>
+        </tr></thead>
+        <tbody id="dsmTb"></tbody>
+      </table></div>
+      <div class="pg-bar">
+        <span class="info">共 <b id="dsmTotal">0</b> 条</span>
+        <span class="pg">‹</span><span class="pg active">1</span><span class="pg">›</span>
+      </div>
+    </div>
+  `;
+  ['dsmKc','dsmKn','dsmKt','dsmKs'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.addEventListener(el.tagName==='SELECT'?'change':'input',renderDSMTb);
+  });
+  renderDSMTb();
+}
+
+function renderDSMTb(){
+  const kc=(document.getElementById('dsmKc')?.value||'').toLowerCase();
+  const kn=(document.getElementById('dsmKn')?.value||'').toLowerCase();
+  const kt=document.getElementById('dsmKt')?.value;
+  const ks=document.getElementById('dsmKs')?.value;
+  let arr=DSM.slice();
+  if(kc)arr=arr.filter(d=>d.code.toLowerCase().includes(kc));
+  if(kn)arr=arr.filter(d=>d.name.toLowerCase().includes(kn));
+  if(kt!=='全部')arr=arr.filter(d=>d.db_type===kt);
+  if(ks!=='全部')arr=arr.filter(d=>(ks==='启用'?d.state===1:d.state===0));
+  const tb=document.getElementById('dsmTb');
+  tb.innerHTML=arr.map((d,i)=>`
+    <tr>
+      <td class="center">${i+1}</td>
+      <td><span class="mono">${d.code}</span></td>
+      <td><b style="color:#1d2129;">${d.name}</b></td>
+      <td>${stEl(d.db_type,d.db_type==='MYSQL'?'info':(d.db_type==='DORIS'?'purple':(d.db_type==='REDIS'?'warn':'gray')))}</td>
+      <td><span class="mono ellipsis" style="max-width:260px;" title="${d.jdbc_url}">${d.jdbc_url}</span></td>
+      <td>${d.username}</td>
+      <td class="center">${d.pool_min}-${d.pool_max}</td>
+      <td>${d.group}</td>
+      <td>${stEl(d.state===1?'启用':'禁用',d.state===1?'ok':'gray')}</td>
+      <td>${d.update_time}</td>
+      <td class="op">
+        <button class="btn sm link" onclick="toast('测试连接中...','success')">测试</button>
+        <button class="btn sm link" onclick="toast('已切换','success')">${d.state===1?'禁用':'启用'}</button>
+        <button class="btn sm link" onclick="openDSME(${i})">编辑</button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('dsmTotal').textContent=arr.length;
+}
+
+// 数据源新增/编辑弹窗
+let dsmEditIdx=-1;  // -1 表示新增
+
+function openDSME(idx){
+  dsmEditIdx=(typeof idx==='number')?idx:-1;
+  const isEdit=dsmEditIdx>=0;
+  document.getElementById('dlgDSMETitle').textContent=isEdit?'编辑数据源':'新增数据源';
+  document.getElementById('dsmPwdHint').textContent=isEdit?'(留空表示不修改)':'*';
+  let d=null;
+  if(isEdit){
+    // 用过滤后的数组下标找真实数据源
+    const kc=(document.getElementById('dsmKc')?.value||'').toLowerCase();
+    const kn=(document.getElementById('dsmKn')?.value||'').toLowerCase();
+    const kt=document.getElementById('dsmKt')?.value;
+    const ks=document.getElementById('dsmKs')?.value;
+    let arr=DSM.slice();
+    if(kc)arr=arr.filter(d=>d.code.toLowerCase().includes(kc));
+    if(kn)arr=arr.filter(d=>d.name.toLowerCase().includes(kn));
+    if(kt!=='全部')arr=arr.filter(d=>d.db_type===kt);
+    if(ks!=='全部')arr=arr.filter(d=>(ks==='启用'?d.state===1:d.state===0));
+    d=arr[dsmEditIdx];
+  }
+  document.getElementById('dsmCode').value=d?.code||'';
+  document.getElementById('dsmCode').disabled=isEdit;  // 编辑时编码不可改
+  document.getElementById('dsmName').value=d?.name||'';
+  document.getElementById('dsmType').value=d?.db_type||'MYSQL';
+  document.getElementById('dsmGroup').value=d?.group||'数据门户';
+  document.getElementById('dsmUrl').value=d?.jdbc_url||'';
+  document.getElementById('dsmUser').value=d?.username||'';
+  document.getElementById('dsmPwd').value='';
+  document.getElementById('dsmPoolMin').value=d?.pool_min??2;
+  document.getElementById('dsmPoolMax').value=d?.pool_max??8;
+  document.getElementById('dsmRemark').value=d?.remark||'';
+  document.getElementById('dsmState').checked=(d?.state??1)===1;
+  document.getElementById('dsmTest').checked=true;
+  document.getElementById('dlgDSME').classList.add('show');
+}
+
+function testDSME(){
+  const url=(document.getElementById('dsmUrl').value||'').trim();
+  const type=document.getElementById('dsmType').value;
+  if(!url){
+    toast('请先填写 JDBC URL','error');return;
+  }
+  // 简单格式校验
+  if(type==='REDIS'&&!url.startsWith('redis://')){
+    toast('REDIS URL 应以 redis:// 开头','error');return;
+  }
+  if(type!=='REDIS'&&!url.startsWith('jdbc:')){
+    toast(type+' 的 URL 应以 jdbc: 开头','error');return;
+  }
+  toast('测试连接中…','success');
+  setTimeout(()=>{
+    const ok=(document.getElementById('dsmUser').value||'').length>0 || type==='REDIS';
+    toast(ok?'✓ 连接成功':'✗ 连接失败(请检查用户名/密码)', ok?'success':'error');
+  },600);
+}
+
+function saveDSME(){
+  const code=(document.getElementById('dsmCode').value||'').trim();
+  const name=(document.getElementById('dsmName').value||'').trim();
+  const type=document.getElementById('dsmType').value;
+  const group=document.getElementById('dsmGroup').value;
+  const url=(document.getElementById('dsmUrl').value||'').trim();
+  const user=(document.getElementById('dsmUser').value||'').trim();
+  const pwd=document.getElementById('dsmPwd').value;
+  const pMin=parseInt(document.getElementById('dsmPoolMin').value)||0;
+  const pMax=parseInt(document.getElementById('dsmPoolMax').value)||1;
+  const remark=(document.getElementById('dsmRemark').value||'').trim();
+  const state=document.getElementById('dsmState').checked?1:0;
+  const doTest=document.getElementById('dsmTest').checked;
+
+  // 校验
+  if(!code){toast('请填写编码','error');return;}
+  if(!name){toast('请填写名称','error');return;}
+  if(!url){toast('请填写 JDBC URL','error');return;}
+  if(pMin<0||pMax<pMin){toast('连接池范围无效','error');return;}
+
+  const now=new Date();
+  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+  if(dsmEditIdx>=0){
+    // 编辑：找到过滤数组中对应的真实条目
+    const kc=(document.getElementById('dsmKc')?.value||'').toLowerCase();
+    const kn=(document.getElementById('dsmKn')?.value||'').toLowerCase();
+    const kt=document.getElementById('dsmKt')?.value;
+    const ks=document.getElementById('dsmKs')?.value;
+    let arr=DSM.slice();
+    if(kc)arr=arr.filter(d=>d.code.toLowerCase().includes(kc));
+    if(kn)arr=arr.filter(d=>d.name.toLowerCase().includes(kn));
+    if(kt!=='全部')arr=arr.filter(d=>d.db_type===kt);
+    if(ks!=='全部')arr=arr.filter(d=>(ks==='启用'?d.state===1:d.state===0));
+    const target=arr[dsmEditIdx];
+    if(!target){toast('记录不存在','error');return;}
+    Object.assign(target,{name,db_type:type,group,jdbc_url:url,username:user||target.username,
+      pool_min:pMin,pool_max:pMax,remark,state,update_time:ts});
+    if(doTest)toast('已保存,连接测试通过','success');
+    else toast('已保存','success');
+  }else{
+    // 新增：检查编码唯一
+    if(DSM.some(d=>d.code===code)){toast('编码已存在: '+code,'error');return;}
+    const newId=DSM.length?Math.max(...DSM.map(d=>d.id))+1:1;
+    DSM.push({id:newId,code,name,db_type:type,jdbc_url:url,username:user||'-',
+      pool_min:pMin,pool_max:pMax,group,state,update_time:ts,remark});
+    if(doTest)toast('已新增 '+code+' · 连接测试通过','success');
+    else toast('已新增 '+code,'success');
+  }
+  closeDlg('dlgDSME');
+  renderDSMTb();
+}
+
+// ====================== SQL 模板 ======================
+let curSql=null;
+let curSub='info';
+
+function renderSQLList(){
+  document.getElementById('root').innerHTML=`
+    <div class="sql-layout">
+      <div class="sql-list">
+        <div class="sql-list-head"><input class="ipt sql-list-search" placeholder="🔍 搜索编码 / 名称" id="sqlKw" oninput="renderSQLTb()" /></div>
+        <div class="sql-list-body" id="sqlTb"></div>
+        <div style="padding:10px 16px;border-top:1px solid #f0f1f3;display:flex;justify-content:space-between;align-items:center;background:#fafbfc;">
+          <span style="font-size:12px;color:#86909c;">共 <b id="sqlTotal">0</b> 个模板</span>
+          <button class="btn sm primary" onclick="toast('已新建(演示)','success')">+ 新建</button>
+        </div>
+      </div>
+      <div class="sql-detail" id="sqlDet"></div>
+    </div>
+  `;
+  renderSQLTb();
+}
+
+function renderSQLTb(){
+  const kw=(document.getElementById('sqlKw')?.value||'').toLowerCase();
+  const arr=SQL_TPLS.filter(t=>!kw||t.code.toLowerCase().includes(kw)||t.name.toLowerCase().includes(kw));
+  document.getElementById('sqlTotal').textContent=arr.length;
+  document.getElementById('sqlTb').innerHTML=arr.map(t=>`
+    <div class="sql-list-item ${curSql===t.id?'active':''}" onclick="openSQL(${t.id})">
+      <div class="nm">${t.name}</div>
+      <div class="cd">${t.code}</div>
+      <div class="mt">
+        ${stEl(t.sql_type,t.sql_type==='COMPOSITE'?'purple':'info')}
+        ${stEl(t.state===1?'启用':'禁用',t.state===1?'ok':'gray')}
+        <span style="font-size:11px;color:#86909c;">v${t.version}</span>
+      </div>
+    </div>
+  `).join('');
+  if(!curSql&&arr.length)openSQL(arr[0].id);
+}
+
+function openSQL(id){
+  curSql=id;curSub='info';
+  renderSQLTb();
+  renderSQLDet();
+}
+
+function renderSQLDet(){
+  const t=SQL_TPLS.find(x=>x.id===curSql);
+  const el=document.getElementById('sqlDet');
+  if(!t){el.innerHTML=`<div class="empty" style="margin:auto;"><div class="ic">📋</div>请从左侧选择</div>`;return;}
+  el.innerHTML=`
+    <div class="sql-detail-head">
+      <div>
+        <div class="tt">${t.name}</div>
+        <div class="cd">${t.code} · 数据源 ${t.ds_code} · v${t.version}</div>
+      </div>
+      <div class="right">
+        <button class="btn warn" onclick="runTest()">🧪 试跑</button>
+        <button class="btn primary" onclick="toast('已保存','success')">💾 保存</button>
+      </div>
+    </div>
+    <div class="sub-nav">
+      <div class="sub-nav-item ${curSub==='info'?'active':''}" onclick="switchSqlSub('info',this)">基本信息</div>
+      <div class="sub-nav-item ${curSub==='sql'?'active':''}" onclick="switchSqlSub('sql',this)">SQL 脚本</div>
+      <div class="sub-nav-item ${curSub==='params'?'active':''}" onclick="switchSqlSub('params',this)">参数定义 (${t.params.length})</div>
+      <div class="sub-nav-item ${curSub==='history'?'active':''}" onclick="switchSqlSub('history',this)">版本历史 (${t.history.length})</div>
+    </div>
+    <div class="sub-pane ${curSub==='info'?'active':''}">
+      <div class="form">
+        <div class="fg"><div class="lbl">编码</div><input class="ipt block" value="${t.code}" /></div>
+        <div class="fg"><div class="lbl">显示名</div><input class="ipt block" value="${t.name}" /></div>
+        <div class="fg"><div class="lbl">关联数据源</div><select class="sel block"><option>${t.ds_code}</option></select></div>
+        <div class="fg"><div class="lbl">SQL 类型</div><select class="sel block"><option ${t.sql_type==='QUERY'?'selected':''}>QUERY</option><option ${t.sql_type==='DDL'?'selected':''}>DDL</option><option ${t.sql_type==='COMPOSITE'?'selected':''}>COMPOSITE</option></select></div>
+        <div class="fg"><div class="lbl">状态</div><select class="sel block"><option>启用</option><option>禁用</option></select></div>
+        <div class="fg full"><div class="lbl">备注</div><textarea class="ipt block">${t.code} 业务 SQL 模板</textarea></div>
+      </div>
+    </div>
+    <div class="sub-pane ${curSub==='sql'?'active':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 使用 <code>#{paramName}</code> 占位符</div>
+      <textarea class="sql-edit" style="min-height:300px;">${t.sql_text}</textarea>
+    </div>
+    <div class="sub-pane ${curSub==='params'?'active':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 SQL 中每个 <code>#{xxx}</code> 必须在此定义</div>
+      <div class="tbl" style="max-height:380px;"><table>
+        <thead><tr><th style="width:40px;">#</th><th>形参名</th><th>显示名</th><th>类型</th><th>必填</th><th>UI控件</th><th>变更频度</th><th style="width:90px;">操作</th></tr></thead>
+        <tbody>${t.params.map((p,i)=>`<tr>
+          <td class="center">${i+1}</td>
+          <td><span class="mono">#{${p.name}}</span></td>
+          <td>${p.label}</td>
+          <td>${stEl(p.type,'info')}</td>
+          <td class="center">${p.required?stEl('是','fail'):stEl('否','gray')}</td>
+          <td>${stEl(p.ui,p.ui==='MONTH_PICKER'?'warn':'gray')}</td>
+          <td>${stEl(p.change_freq,p.change_freq==='MONTHLY'?'warn':(p.change_freq==='NEVER'?'ok':'gray'))}</td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+    <div class="sub-pane ${curSub==='history'?'active':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 每次 UPDATE 自动产生快照</div>
+      <div class="tbl" style="max-height:380px;"><table>
+        <thead><tr><th>版本</th><th>操作人</th><th>操作时间</th><th style="width:160px;">操作</th></tr></thead>
+        <tbody>${t.history.map((h,i)=>`<tr>
+          <td><span class="mono">v${h.version}${i===0?' '+stEl('当前','ok'):''}</span></td>
+          <td>${h.operator}</td>
+          <td>${h.operate_time}</td>
+          <td class="op"><button class="btn sm link">查看</button>${i!==0?`<button class="btn sm link" onclick="toast('已回滚到 v${h.version}','success')">回滚</button>`:''}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+  `;
+}
+
+function switchSqlSub(s,el){
+  curSub=s;
+  el.parentElement.querySelectorAll('.sub-nav-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  renderSQLDet();
+}
+
+function runTest(){
+  const t=SQL_TPLS.find(x=>x.id===curSql);
+  if(!t){toast('请先选择模板','error');return}
+  const r=document.createElement('div');
+  r.className='test-result';
+  r.innerHTML=`<span class="ts">[${new Date().toLocaleTimeString()}]</span> 加载 SQL 模板 <span class="k">${t.code}</span> (v${t.version}) ...
+<span class="ts">[${new Date().toLocaleTimeString()}]</span> 绑定参数: <span class="k">{ period: "202608" }</span>
+<span class="ts">[${new Date().toLocaleTimeString()}]</span> 执行 sql_type=<span class="k">${t.sql_type}</span>, data_source=<span class="k">${t.ds_code}</span> ...
+<span class="ts">[${new Date().toLocaleTimeString()}]</span> <span class="ok">✓ 执行成功</span>,耗时: <span class="k">${(Math.random()*2+0.5).toFixed(2)}s</span>
+<span class="ts">[${new Date().toLocaleTimeString()}]</span> 影响行数: <span class="k">${Math.floor(Math.random()*10+3)}</span>
+<span class="ts">[${new Date().toLocaleTimeString()}]</span> 写入 exec_log (trace_id=tr_${Date.now()})`;
+  toast('试跑成功','success');
+}
+
+// ====================== SAP 字段字典 ======================
+function renderSAP(){
+  document.getElementById('root').innerHTML=`
+    <div class="panel">
+      <div class="filter-bar">
+        <div class="field"><span class="lbl">字段编码</span><input class="ipt" placeholder="如 BATCHID" /></div>
+        <div class="field"><span class="lbl">类型</span><select class="sel"><option>全部</option><option>VARCHAR</option><option>CHAR</option><option>DECIMAL</option></select></div>
+        <div class="grow"></div>
+        <button class="btn primary" onclick="toast('已新增字段(演示)','success')">+ 新增字段</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th style="width:40px;">#</th><th>编码</th><th>名称</th><th>类型</th><th>必填</th><th>说明</th><th>状态</th><th style="width:120px;">操作</th></tr></thead>
+        <tbody>${SAP_FIELDS.map((f,i)=>`<tr>
+          <td class="center">${i+1}</td>
+          <td><span class="mono">${f.code}</span></td>
+          <td><b style="color:#1d2129;">${f.name}</b></td>
+          <td><span class="mono">${f.type}</span></td>
+          <td class="center">${f.required?stEl('是','fail'):stEl('否','gray')}</td>
+          <td style="color:#86909c;font-size:12px;">${f.note||'-'}</td>
+          <td>${stEl(f.status===1?'启用':'禁用',f.status===1?'ok':'gray')}</td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">禁用</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+      <div class="pg-bar"><span class="info">共 <b>${SAP_FIELDS.length}</b> 个字段 · 基线 45 字段字典</span></div>
+    </div>
+  `;
+}
+
+// ====================== 科目映射 ======================
+function renderAcct(){
+  document.getElementById('root').innerHTML=`
+    <div class="panel">
+      <div class="filter-bar">
+        <div class="field"><span class="lbl">业务</span><select class="sel"><option>全部</option><option>结转一</option><option>结转二</option><option>非现金流</option></select></div>
+        <div class="field"><span class="lbl">科目</span><input class="ipt" placeholder="如 8054000003" /></div>
+        <div class="grow"></div>
+        <button class="btn primary" onclick="toast('已新增映射(演示)','success')">+ 新增映射</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th style="width:40px;">#</th><th>业务</th><th>条件表达式</th><th>科目(HKONT)</th><th>科目类型</th><th>说明</th><th style="width:120px;">操作</th></tr></thead>
+        <tbody>${ACCT_MAP.map((m,i)=>`<tr>
+          <td class="center">${i+1}</td>
+          <td>${m.biz}</td>
+          <td><span class="mono">${m.condition}</span></td>
+          <td><span class="mono">${m.hkont}</span></td>
+          <td>${stEl(m.koart,'info')}</td>
+          <td style="color:#86909c;">${m.remark}</td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+      <div class="pg-bar"><span class="info">共 <b>${ACCT_MAP.length}</b> 条科目映射 · 关联 <b>${new Set(ACCT_MAP.map(m=>m.biz)).size}</b> 个业务</span></div>
+    </div>
+  `;
+}
+
+// ====================== 业务编码字典 ======================
+function renderBCDict(){
+  document.getElementById('root').innerHTML=`
+    <div class="panel">
+      <div class="filter-bar">
+        <div class="grow"></div>
+        <button class="btn primary" onclick="toast('已新增编码(演示)','success')">+ 新增业务编码</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th style="width:40px;">#</th><th>业务</th><th>编码</th><th>说明</th><th>状态</th><th style="width:120px;">操作</th></tr></thead>
+        <tbody>${BC_DICT.map((b,i)=>`<tr>
+          <td class="center">${i+1}</td>
+          <td><b style="color:#1d2129;">${b.biz}</b></td>
+          <td><span class="mono">${b.code}</span></td>
+          <td style="color:#86909c;">${b.remark}</td>
+          <td>${stEl(b.status===1?'启用':'禁用',b.status===1?'ok':'gray')}</td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">禁用</button></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+      <div class="pg-bar"><span class="info">共 <b>${BC_DICT.length}</b> 个业务编码 · 用于 BATCHID 拼接</span></div>
+    </div>
+  `;
+}
+
+// ====================== 加工脚本配置 ======================
+function renderProc(){
+  document.getElementById('root').innerHTML=`
+    <div class="sql-layout">
+      <div class="sql-list">
+        <div class="sql-list-head"><input class="ipt sql-list-search" placeholder="🔍 搜索业务 / 脚本编码" id="procKw" oninput="renderProcTb()" /></div>
+        <div class="sql-list-body" id="procTb"></div>
+        <div style="padding:10px 16px;border-top:1px solid #f0f1f3;display:flex;justify-content:space-between;align-items:center;background:#fafbfc;">
+          <span style="font-size:12px;color:#86909c;">共 <b id="procTotal">0</b> 个加工脚本</span>
+          <button class="btn sm primary" onclick="toast('已新建(演示)','success')">+ 新建</button>
+        </div>
+      </div>
+      <div class="sql-detail" id="procDet"></div>
+    </div>
+  `;
+  renderProcTb();
+}
+
+function renderProcTb(){
+  const kw=(document.getElementById('procKw')?.value||'').toLowerCase();
+  const arr=PROC_SCRIPTS.filter(t=>!kw||t.code.toLowerCase().includes(kw)||t.biz.toLowerCase().includes(kw)||t.name.toLowerCase().includes(kw));
+  document.getElementById('procTotal').textContent=arr.length;
+  document.getElementById('procTb').innerHTML=arr.map(t=>`
+    <div class="sql-list-item ${curProcTb?.id===t.id?'active':''}" onclick="openProc(${t.id})">
+      <div class="nm">${t.name}</div>
+      <div class="cd">${t.code}</div>
+      <div class="mt">
+        ${stEl(t.sql_type,'info')}
+        ${stEl(t.state===1?'启用':'禁用',t.state===1?'ok':'gray')}
+        <span style="font-size:11px;color:#86909c;">v${t.version}</span>
+      </div>
+    </div>
+  `).join('');
+  if(!curProcTb && arr.length) openProc(arr[0].id);
+}
+
+let curProcTb=null;
+let curProcSub='info';
+
+function openProc(id){
+  curProcTb=PROC_SCRIPTS.find(x=>x.id===id);
+  curProcSub='info';
+  renderProcTb();
+  renderProcDet();
+}
+
+function renderProcDet(){
+  const t=curProcTb;
+  const el=document.getElementById('procDet');
+  if(!t){el.innerHTML=`<div class="empty" style="margin:auto;"><div class="ic">📋</div>请从左侧选择加工脚本</div>`;return;}
+  el.innerHTML=`
+    <div class="sql-detail-head">
+      <div>
+        <div class="tt">${t.name}</div>
+        <div class="cd">${t.code} · 业务 ${t.biz} · 数据源 ${t.ds_code} · v${t.version}</div>
+      </div>
+      <div class="right">
+        <button class="btn warn" onclick="runProc()">🧪 试跑</button>
+        <button class="btn primary" onclick="saveProc()">💾 保存</button>
+      </div>
+    </div>
+    <div class="sub-nav">
+      <div class="sub-nav-item ${curProcSub==='info'?'active':''}" onclick="switchProcSub('info',this)">基本信息</div>
+      <div class="sub-nav-item ${curProcSub==='sql'?'active':''}" onclick="switchProcSub('sql',this)">SQL 脚本</div>
+      <div class="sub-nav-item ${curProcSub==='io'?'active':''}" onclick="switchProcSub('io',this)">输入/输出 (${t.inputs.length}/${t.outputs.length})</div>
+      <div class="sub-nav-item ${curProcSub==='history'?'active':''}" onclick="switchProcSub('history',this)">版本历史 (${t.history.length})</div>
+    </div>
+    <div class="sub-pane ${curProcSub==='info'?'active':''}">
+      <div class="form">
+        <div class="fg"><div class="lbl">脚本编码</div><input class="ipt block" value="${t.code}" /></div>
+        <div class="fg"><div class="lbl">显示名</div><input class="ipt block" value="${t.name}" /></div>
+        <div class="fg"><div class="lbl">关联业务</div><select class="sel block"><option selected>${t.biz}</option></select></div>
+        <div class="fg"><div class="lbl">关联数据源</div><select class="sel block"><option selected>${t.ds_code}</option></select></div>
+        <div class="fg"><div class="lbl">SQL 类型</div><select class="sel block"><option ${t.sql_type==='QUERY'?'selected':''}>QUERY</option><option ${t.sql_type==='DDL'?'selected':''}>DDL</option><option ${t.sql_type==='COMPOSITE'?'selected':''}>COMPOSITE</option></select></div>
+        <div class="fg"><div class="lbl">状态</div><select class="sel block"><option ${t.state===1?'selected':''}>启用</option><option ${t.state===0?'selected':''}>禁用</option></select></div>
+        <div class="fg full"><div class="lbl">输入表(${t.input_table})</div><input class="ipt block mono" value="${t.input_table}" readonly /></div>
+        <div class="fg full"><div class="lbl">说明</div><textarea class="ipt block">${t.remark}</textarea></div>
+        <div class="fg full">
+          <div class="lbl">审计</div>
+          <div style="font-size:12px;color:#86909c;">最后更新: ${t.update_time} by ${t.update_by} · 当前版本 v${t.version}</div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-pane ${curProcSub==='sql'?'active':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">
+        <span>📌 使用 <code>#{paramName}</code> 占位符 · 输出字段见 <code>sap_field_dict</code></span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn sm" onclick="toast('已格式化','success')">格式化</button>
+          <button class="btn sm" onclick="toast('已复制','success')">复制</button>
+        </div>
+      </div>
+      <textarea class="sql-edit" style="min-height:300px;">${t.sql_text}</textarea>
+    </div>
+    <div class="sub-pane ${curProcSub==='io'?'active':''}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <div style="font-size:13px;color:#4e5969;font-weight:500;margin-bottom:8px;">📥 输入参数 (${t.inputs.length})</div>
+          <div class="tbl" style="max-height:380px;"><table>
+            <thead><tr><th>#</th><th>形参名</th><th>类型</th></tr></thead>
+              <tbody>${t.inputs.map((p,i)=>`<tr><td class="center">${i+1}</td><td><span class="mono">#{${p}}</span></td><td>${stEl(p.startsWith('temp_')||p.startsWith('v_')?'STRING':'STRING','info')}</td></tr>`).join('')}</tbody>
+            </table></div>
+        </div>
+        <div>
+          <div style="font-size:13px;color:#4e5969;font-weight:500;margin-bottom:8px;">📤 输出字段 (SAP 凭证行 · ${t.outputs.length})</div>
+          <div class="tbl" style="max-height:380px;"><table>
+            <thead><tr><th>#</th><th>字段名</th><th>来源</th></tr></thead>
+              <tbody>${t.outputs.map((f,i)=>`<tr><td class="center">${i+1}</td><td><span class="mono">${f}</span></td><td style="color:#86909c;font-size:11px;">${f==='HKONT'||f==='KOART'||f==='HKONT1'?'account_map':(f==='PRCTR'?'profit_center_map':(f==='BATCHID'||f==='MONAT'||f==='GJAHR'?'业务编码+派生':'常量'))}</td></tr>`).join('')}</tbody>
+            </table></div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-pane ${curProcSub==='history'?'active':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 每次 UPDATE 自动产生快照</div>
+      <div class="tbl" style="max-height:380px;"><table>
+        <thead><tr><th>版本</th><th>操作人</th><th>操作时间</th><th style="width:140px;">操作</th></tr></thead>
+        <tbody>${t.history.map((h,i)=>`<tr>
+          <td><span class="mono">v${h.version}${i===0?' '+stEl('当前','ok'):''}</span></td>
+          <td>${h.operator}</td>
+          <td>${h.operate_time}</td>
+          <td class="op"><button class="btn sm link">查看</button>${i!==0?`<button class="btn sm link" onclick="toast('已回滚到 v${h.version}','success')">回滚</button>`:''}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+  `;
+}
+
+function switchProcSub(s,el){
+  curProcSub=s;
+  el.parentElement.querySelectorAll('.sub-nav-item').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  renderProcDet();
+}
+
+function runProc(){
+  const t=curProcTb;
+  if(!t){toast('请先选择脚本','error');return}
+  const period=(BIZ[t.biz_code]&&BIZ[t.biz_code].period)||'202608';
+  toast(`试跑 ${t.code} v${t.version} (账期 ${period})`,'success');
+}
+
+function saveProc(){
+  const t=curProcTb;
+  if(!t)return;
+  t.version+=1;
+  t.update_time=new Date().toISOString().slice(0,19).replace('T',' ');
+  t.update_by='W8406768@XZ';
+  t.history.unshift({version:t.version,operator:t.update_by,operate_time:t.update_time});
+  renderProcTb();
+  renderProcDet();
+  toast(`已保存,v${t.version} 快照已写入历史`,'success');
+}
+
+// ====================== 操作日志 ======================
+function renderOpLog(){
+  document.getElementById('root').innerHTML=`
+    <div class="panel">
+      <div class="filter-bar">
+        <div class="field"><span class="lbl">时间</span><input class="ipt" value="2026-09-22" /></div>
+        <div class="field"><span class="lbl">操作人</span><input class="ipt" placeholder="W8406768@XZ" /></div>
+        <div class="field"><span class="lbl">模块</span><select class="sel"><option>全部</option><option>结转一</option><option>结转二</option><option>数据源管理</option><option>SQL 模板</option></select></div>
+        <div class="field"><span class="lbl">状态</span><select class="sel"><option>全部</option><option>成功</option><option>失败</option></select></div>
+        <div class="grow"></div>
+        <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>时间</th><th>操作人</th><th>模块</th><th>操作内容</th><th>IP</th><th>耗时</th><th>状态</th><th>trace_id</th></tr></thead>
+        <tbody>${OP_LOGS.map(l=>`<tr class="${l.status==='失败'?'fail':''}">
+          <td><span class="mono">${l.ts}</span></td>
+          <td>${l.user}</td>
+          <td>${l.module}</td>
+          <td>${l.op}${l.err?`<br><span style="color:#f53f3f;font-size:11px;">${l.err}</span>`:''}</td>
+          <td><span class="mono">${l.ip}</span></td>
+          <td>${l.cost}</td>
+          <td>${stEl(l.status,l.status==='成功'?'ok':'fail')}</td>
+          <td><span class="mono ellipsis" style="max-width:180px;">${l.trace}</span></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+      <div class="pg-bar"><span class="info">共 <b>${OP_LOGS.length}</b> 条 · 哈希链已落 OSS 归档</span></div>
+    </div>
+  `;
+}
+
+// ====================== 业务快照 ======================
+function renderSnap(){
+  document.getElementById('root').innerHTML=`
+    <div class="panel">
+      <div class="filter-bar">
+        <div class="field"><span class="lbl">业务</span><select class="sel"><option>全部</option><option>结转一</option><option>结转二</option></select></div>
+        <div class="field"><span class="lbl">类型</span><select class="sel"><option>全部</option><option>SOURCE</option><option>TEMP_TABLE</option><option>PROCESS</option><option>VOUCHER</option><option>PUSH</option></select></div>
+        <div class="grow"></div>
+        <button class="btn" onclick="toast('已刷新 OSS','success')">🔄 刷新 OSS</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>trace_id</th><th>业务</th><th>类型</th><th>账期</th><th>大小</th><th>生成时间</th><th>操作人</th><th style="width:140px;">操作</th></tr></thead>
+        <tbody>${SNAPSHOTS.map(s=>`<tr>
+          <td><span class="mono ellipsis" style="max-width:200px;">${s.trace}</span></td>
+          <td>${s.biz}</td>
+          <td>${stEl(s.type,s.type==='VOUCHER'?'info':(s.type==='PROCESS'?'purple':(s.type==='SOURCE'?'ok':(s.type==='TEMP_TABLE'?'warn':'gray'))))}</td>
+          <td>${s.period}</td>
+          <td>${s.size}</td>
+          <td>${s.time}</td>
+          <td>${s.user}</td>
+          <td class="op">
+            <button class="btn sm link" onclick="toast('下载快照','success')">📥 下载</button>
+            <button class="btn sm link" onclick="toast('查看详情','success')">详情</button>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+      <div class="pg-bar"><span class="info">共 <b>${SNAPSHOTS.length}</b> 个快照 · 8 类快照(SOURCE/TEMP_TABLE/PROCESS/VOUCHER/MSG/PUSH/RECEIPT/LOG)</span></div>
+    </div>
+  `;
+}
+
+// 初始化
+renderBiz('settle02');
+</script>
+</body>
+</html>
