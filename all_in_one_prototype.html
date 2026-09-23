@@ -2,251 +2,333 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>智能财务月结系统 - 全部功能原型</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>智能财务月结系统</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#eef0f3;color:#1f2329;font-size:14px;min-height:100vh}
-  html,body{background:#eef0f3}
-  /* top */
-  .topbar{height:56px;background:#fff;border-bottom:1px solid #f0f1f3;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(31,35,41,.04)}
-  .topbar .brand{font-size:16px;font-weight:600;color:#1d2129;display:flex;align-items:center;gap:8px}
-  .topbar .brand::before{content:'';width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#165dff,#4080ff);box-shadow:0 2px 6px rgba(22,93,255,.3)}
-  .topbar .brand b{color:#165dff}
-  .topbar .crumb{margin-left:24px;color:#86909c;font-size:13px}
-  .topbar .crumb b{color:#1d2129;font-weight:500}
-  .topbar .user{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:#4e5969;padding:6px 12px 6px 6px;border-radius:20px}
-  .topbar .user:hover{background:#f7f8fa}
-  .topbar .user .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#165dff,#4080ff);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;box-shadow:0 2px 6px rgba(22,93,255,.25)}
-  .layout{display:flex;min-height:calc(100vh - 56px)}
-  /* sidebar */
-  .sidebar{width:208px;background:#fff;border-right:1px solid #e5e6eb;padding:12px 0;overflow:auto}
-  .sg-title{padding:14px 22px 8px;font-size:11px;color:#c9cdd4;letter-spacing:1px;font-weight:600}
-  .mi{padding:10px 22px 10px 18px;cursor:pointer;color:#4e5969;font-size:13px;border-left:3px solid transparent;display:flex;align-items:center;gap:10px;transition:all .15s ease;margin:1px 0}
-  .mi:hover{background:#f7faff;color:#165dff}
-  .mi.active{background:linear-gradient(90deg,#e8f3ff,#f7faff);color:#165dff;border-left-color:#165dff;font-weight:500}
-  .mi .dot{width:5px;height:5px;border-radius:50%;background:#d6d8db}
-  .mi.active .dot{background:#165dff;box-shadow:0 0 0 3px rgba(22,93,255,.18)}
-  .mi .tag{margin-left:auto;font-size:11px;color:#86909c;background:#f0f2f5;padding:1px 6px;border-radius:8px}
-  .mi.active .tag{background:#fff;color:#165dff}
-  .content{flex:1;padding:24px;overflow:auto;background:#f5f7fa}
-  /* panel */
-  .panel{background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(31,35,41,.08),0 2px 6px rgba(31,35,41,.04);border:1px solid #ebedf0;overflow:hidden}
-  /* tab */
-  .tab-nav{display:flex;border-bottom:1px solid #e5e6eb;padding:0 24px;background:#fafbfc}
-  .tab-nav-item{padding:16px 4px;margin:0 22px 0 0;cursor:pointer;font-size:15px;color:#4e5969;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;transition:color .2s ease}
-  .tab-nav-item:hover{color:#165dff}
-  .tab-nav-item.active{color:#165dff;border-bottom-color:#165dff;font-weight:600}
-  .tab-pane{display:none;padding:20px 24px}
-  .tab-pane.active{display:block}
-  .sub-nav{display:flex;gap:24px;border-bottom:1px solid #e5e6eb;padding:0 20px;background:#fafbfc}
-  .sub-nav-item{padding:12px 0;cursor:pointer;font-size:13px;color:#4e5969;border-bottom:2px solid transparent;transition:color .15s}
-  .sub-nav-item.active{color:#165dff;border-bottom-color:#165dff;font-weight:500}
-  .sub-nav-item:hover{color:#165dff}
-  .sub-pane{display:none;padding:18px 20px;flex:1;overflow:auto}
-  .sub-pane.active{display:flex;flex-direction:column}
-  /* toolbar */
-  .filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:4px 0 14px}
-  .filter-bar .grow{flex:1}
-  .field{display:inline-flex;align-items:center;gap:6px;font-size:13px}
-  .field .lbl{color:#86909c;font-size:13px}
-  .ipt,.sel{padding:6px 10px;border:1px solid #c9cdd4;border-radius:4px;background:#fff;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;min-width:140px;color:#1d2129}
-  .ipt:hover,.sel:hover{border-color:#86909c}
-  .ipt:focus,.sel:focus{border-color:#165dff;box-shadow:0 0 0 3px rgba(22,93,255,.12)}
-  .ipt.sm,.sel.sm{min-width:120px;padding:4px 8px}
-  .ipt.block,.sel.block{width:100%;min-width:0}
-  textarea.ipt{min-height:80px;font-family:inherit;resize:vertical}
-  /* button */
-  .btn{padding:5px 14px;border:1px solid #c9cdd4;background:#fff;color:#1d2129;border-radius:4px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px;transition:all .18s ease;font-weight:400}
-  .btn:hover{color:#165dff;border-color:#165dff;box-shadow:0 2px 4px rgba(22,93,255,.08)}
-  .btn.primary{background:#165dff;border-color:#165dff;color:#fff;box-shadow:0 2px 4px rgba(22,93,255,.15)}
-  .btn.primary:hover{background:#4080ff;border-color:#4080ff;color:#fff;box-shadow:0 4px 8px rgba(22,93,255,.2)}
-  .btn.success{background:#00b42a;border-color:#00b42a;color:#fff;box-shadow:0 2px 4px rgba(0,180,42,.15)}
-  .btn.success:hover{background:#23c343;border-color:#23c343;color:#fff;box-shadow:0 4px 8px rgba(0,180,42,.2)}
-  .btn.danger{background:#f53f3f;border-color:#f53f3f;color:#fff;box-shadow:0 2px 4px rgba(245,63,63,.15)}
-  .btn.danger:hover{background:#f76560;border-color:#f76560;color:#fff;box-shadow:0 4px 8px rgba(245,63,63,.2)}
-  .btn.warn{background:#ff7d00;border-color:#ff7d00;color:#fff;box-shadow:0 2px 4px rgba(255,125,0,.15)}
-  .btn.warn:hover{background:#ff9633;border-color:#ff9633;color:#fff;box-shadow:0 4px 8px rgba(255,125,0,.2)}
-  .btn.sm{padding:3px 8px;font-size:12px}
-  .btn.link{border:none;background:transparent;color:#165dff;padding:0;box-shadow:none}
-  .btn.link:hover{background:transparent;color:#4080ff;text-decoration:underline;box-shadow:none}
-  .btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
-  /* table */
-  .tbl{border:1px solid #ebedf0;border-radius:8px;overflow:auto;max-height:560px;background:#fff;box-shadow:0 2px 8px rgba(31,35,41,.05)}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  thead th{background:#f7f8fa;color:#1d2129;font-weight:600;text-align:left;padding:13px 14px;border-bottom:1px solid #e5e6eb;white-space:nowrap;position:sticky;top:0;font-size:13px}
-  thead th:first-child{padding-left:18px}
-  tbody td{padding:13px 14px;border-bottom:1px solid #f2f3f5;color:#4e5969;white-space:nowrap;transition:background .15s ease}
-  tbody td:first-child{padding-left:18px}
-  tbody tr:last-child td{border-bottom:none}
-  tbody tr:hover{background:#f7faff}
-  tbody tr.fail td{background:#fff1f0}
-  tbody tr.fail:hover td{background:#ffe7e5}
-  td.num{text-align:right;font-variant-numeric:tabular-nums}
-  td.center{text-align:center}
-  td.mono{font-family:"Cascadia Code",Consolas,monospace;font-size:12px}
-  td .ellipsis{max-width:200px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:middle}
-  td.op{white-space:nowrap}
-  td.op .btn+.btn{margin-left:4px}
-  /* badge */
-  .st{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;line-height:1.5;border:1px solid;font-weight:500}
-  .st.gray{color:#86909c;background:#f2f3f5;border-color:#e5e6eb}
-  .st.warn{color:#ff7d00;background:#fff7e8;border-color:#ffe4ba}
-  .st.fail{color:#f53f3f;background:#ffeded;border-color:#fdc8c8}
-  .st.ok{color:#00b42a;background:#e8f8e8;border-color:#b7e8b7}
-  .st.info{color:#165dff;background:#e8f3ff;border-color:#bedaff}
-  .st.purple{color:#7c3aed;background:#f5f3ff;border-color:#ede9fe}
-  /* pagination */
-  .pg-bar{display:flex;align-items:center;padding:14px 4px 4px;font-size:13px;color:#4e5969}
-  .pg-bar .info{margin-right:auto;color:#86909c}
-  .pg-bar .pg{min-width:32px;height:32px;line-height:30px;text-align:center;padding:0 10px;border:1px solid #e5e6eb;border-radius:6px;cursor:pointer;background:#fff;margin-left:6px;transition:all .15s ease}
-  .pg-bar .pg:hover{color:#165dff;border-color:#165dff;box-shadow:0 2px 4px rgba(22,93,255,.08)}
-  .pg-bar .pg.active{background:linear-gradient(135deg,#165dff,#4080ff);border-color:#165dff;color:#fff;box-shadow:0 2px 6px rgba(22,93,255,.25)}
-  /* dialog */
-  .mask{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .2s ease}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .mask.show{display:flex}
-  .dlg{background:#fff;border-radius:10px;width:720px;max-width:92vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.22);animation:slideUp .25s ease}
-  .dlg.wide{width:880px}
-  .dlg-head{padding:18px 24px;border-bottom:1px solid #f0f1f3;display:flex;align-items:center}
-  .dlg-head h3{font-size:16px;font-weight:600;color:#1d2129;display:flex;align-items:center;gap:8px}
-  .dlg-head h3::before{content:'';width:3px;height:16px;background:#165dff;border-radius:2px}
-  .dlg-head .close{margin-left:auto;cursor:pointer;color:#86909c;font-size:18px;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;transition:all .15s ease}
-  .dlg-head .close:hover{color:#f53f3f;background:#fff1f0}
-  .dlg-body{padding:22px 24px;overflow:auto;flex:1}
-  .dlg-foot{padding:14px 24px;border-top:1px solid #f0f1f3;display:flex;justify-content:flex-end;gap:10px;background:#fafbfc}
-  /* form */
-  .form{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 18px}
-  .form .full{grid-column:1/-1}
-  .form .fg{display:flex;flex-direction:column;gap:4px}
-  .form .fg .lbl{font-size:13px;color:#4e5969;font-weight:500;display:flex;align-items:center;gap:2px}
-  .form .fg .lbl .req{color:#f53f3f}
-  .form .fg .ipt,.form .fg .sel{width:100%}
-  .form .fg .help{font-size:12px;color:#86909c;margin-top:2px}
-  /* sql editor */
-  .sql-edit{background:#1e1e1e;color:#d4d4d4;padding:14px 16px;border-radius:6px;font-family:"Cascadia Code",Consolas,monospace;font-size:13px;line-height:1.7;border:1px solid #1e1e1e;width:100%;min-height:280px;resize:vertical;outline:none;white-space:pre;overflow:auto}
-  .sql-edit:focus{box-shadow:0 0 0 3px rgba(22,93,255,.18)}
-  /* sql layout */
-  .sql-layout{display:flex;gap:16px;min-height:600px}
-  .sql-list{width:280px;flex-shrink:0;background:#fff;border:1px solid #ebedf0;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(31,35,41,.05)}
-  .sql-list-head{padding:14px 16px;border-bottom:1px solid #f0f1f3;background:#fafbfc}
-  .sql-list-search{width:100%}
-  .sql-list-body{overflow:auto;flex:1}
-  .sql-list-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid #f5f5f5;transition:background .15s ease}
-  .sql-list-item:hover{background:#f7faff}
-  .sql-list-item.active{background:#e8f3ff;border-left:3px solid #165dff}
-  .sql-list-item .nm{font-size:13px;color:#1d2129;font-weight:500;margin-bottom:4px}
-  .sql-list-item .cd{font-size:11px;color:#86909c;font-family:"Cascadia Code",Consolas,monospace}
-  .sql-list-item .mt{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
-  .sql-detail{flex:1;background:#fff;border:1px solid #ebedf0;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(31,35,41,.05)}
-  .sql-detail-head{padding:16px 20px;border-bottom:1px solid #f0f1f3;background:#fafbfc;display:flex;align-items:center;gap:12px}
-  .sql-detail-head .tt{font-size:15px;color:#1d2129;font-weight:600}
-  .sql-detail-head .cd{color:#86909c;font-size:12px;font-family:"Cascadia Code",Consolas,monospace}
-  .sql-detail-head .right{margin-left:auto;display:flex;gap:8px}
-  /* acquire bar */
-  .acquire-bar{display:flex;align-items:center;gap:10px;padding:16px 20px;background:linear-gradient(135deg,#f7faff,#f0f5ff);border:1px solid #d9e7ff;border-radius:8px;margin-bottom:18px;box-shadow:0 2px 6px rgba(22,93,255,.05)}
-  .acquire-bar .ipt,.acquire-bar .sel{min-width:160px;background:#fff}
-  .acquire-bar .lbl{color:#4e5969;font-size:13px;font-weight:500}
-  .acquire-bar .right{margin-left:auto}
-  /* summary */
-  .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
-  .summary .cell{background:#fff;padding:16px 20px;border-radius:8px;border:1px solid #ebedf0;box-shadow:0 2px 6px rgba(31,35,41,.04);transition:all .2s ease}
-  .summary .cell:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(31,35,41,.1);border-color:#d9e1f0}
-  .summary .cell .lbl{font-size:12px;color:#86909c;margin-bottom:6px}
-  .summary .cell .val{font-size:18px;color:#1d2129;font-weight:600;line-height:1.3}
-  .summary .cell.ok .val{color:#00b42a}
-  .summary .cell.warn .val{color:#ff7d00}
-  /* test result */
-  .test-result{margin-top:14px;background:#1e1e1e;color:#d4d4d4;padding:14px 16px;border-radius:6px;font-family:"Cascadia Code",Consolas,monospace;font-size:12px;line-height:1.7;max-height:320px;overflow:auto;white-space:pre}
-  .test-result .ts{color:#569cd6}
-  .test-result .ok{color:#4ec9b0;font-weight:600}
-  .test-result .err{color:#f48771;font-weight:600}
-  .test-result .k{color:#c586c0}
-  .param-form{background:#fafbfc;border:1px solid #ebedf0;border-radius:6px;padding:14px 16px}
-  .param-form .row{display:flex;gap:10px;align-items:center;margin-bottom:10px}
-  .param-form .row:last-child{margin-bottom:0}
-  /* empty */
-  .empty{padding:40px 0;text-align:center;color:#c9cdd4;font-size:13px}
-  .empty .ic{font-size:28px;margin-bottom:6px;opacity:.5}
-  /* toast */
-  .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);padding:10px 22px;background:rgba(0,0,0,.85);color:#fff;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s ease;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px}
-  .toast.show{opacity:1}
-  .toast.success{background:rgba(0,180,42,.95)}
-  .toast.error{background:rgba(245,63,63,.95)}
-  /* upload zone */
-  .upload-zone{border:2px dashed #d9e7ff;border-radius:8px;padding:24px;text-align:center;background:#fafbfc;transition:all .2s ease}
-  .upload-zone:hover{border-color:#165dff;background:#f0f5ff}
-  .upload-zone .ic{font-size:32px;color:#86909c;margin-bottom:8px}
-  .upload-zone .tt{font-size:14px;color:#1d2129;margin-bottom:4px;font-weight:500}
-  .upload-zone .sub{font-size:12px;color:#86909c}
-  /* batch block */
-  .b-block{border:1px solid #e5e6eb;border-radius:6px;padding:16px;margin-bottom:14px}
-  .b-block h4{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:14px}
-  .b-block h4 .idx{width:24px;height:24px;border-radius:50%;background:#e8f3ff;color:#165dff;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:12px}
-  .b-block .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .b-block .gf{background:#fafbfc;border:1px solid #f2f3f5;border-radius:4px;padding:8px 12px}
-  .b-block .gf .lbl{font-size:11px;color:#86909c;margin-bottom:4px}
-  .b-block .gf .val{font-size:13px;color:#1d2129;font-weight:500}
-  .b-block .res{background:#fafbfc;border:1px solid #f2f3f5;border-radius:4px;padding:10px 12px;margin-top:10px;min-height:56px;font-size:12px;color:#4e5969;white-space:pre-wrap;word-break:break-all}
-  /* voucher expand */
-  .v-det td{background:#fafbfc!important;padding:0}
-  .v-det-inner{padding:12px 18px;background:#fafbfc;border-top:1px dashed #e5e6eb;font-size:12px}
-  .v-det-inner .ttl{color:#4e5969;margin-bottom:8px}
-  .kv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 16px;color:#4e5969}
-  .kv-grid .kv .k{color:#86909c;margin-right:4px}
-  .kv-grid .kv .v{color:#1d2129;font-family:"Cascadia Code",Consolas,monospace}
-  /* info card */
-  .info-card{background:linear-gradient(135deg,#f7faff,#f0f5ff);border:1px solid #d9e7ff;border-radius:8px;padding:16px 20px;margin-bottom:16px;display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:#1d2129}
-  .info-card .item{display:flex;flex-direction:column;gap:2px}
-  .info-card .item .lbl{font-size:11px;color:#86909c}
-  .info-card .item .val{font-size:14px;font-weight:600;color:#1d2129}
-  /* merge compare */
-  .merge-compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
-  .merge-compare .src{border:1px solid #e5e6eb;border-radius:6px;padding:12px;background:#fafbfc}
-  .merge-compare .src .hd{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:13px;font-weight:500}
-  .merge-compare .src .hd .dot{width:8px;height:8px;border-radius:50%}
-  .merge-compare .src.tbl{table style="width:100%"}
-  .merge-compare .src .nm{color:#86909c;font-size:11px;margin-bottom:8px}
-  .merge-compare .src.ok{border-color:#b7e8b7;background:#e8f8e8}
-  .merge-compare .src.warn{border-color:#ffd9b3;background:#fff7e8}
-  .merge-compare .src.err{border-color:#fdc8c8;background:#ffeded}
+:root{
+  --pri:#285da8;--pri-2:#204c8a;
+  --ink-1:#273444;--ink-2:#526071;--ink-3:#727e8d;--ink-4:#98a2af;
+  --bg:#f4f6f8;--card:#fff;--line:#e2e7ed;--line-2:#edf0f4;
+  --ok:#367754;--warn:#94651e;--danger:#bd4147;--purple:#656587;
+  --shadow:0 1px 2px rgba(24,39,58,.03);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;background:var(--bg);color:var(--ink-1);font-size:14px;line-height:1.5;overflow:hidden}
+button,input,select,textarea{font-family:inherit}
+::selection{background:#dce8f7}
+:focus-visible{outline:2px solid var(--pri);outline-offset:3px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#ccd2dd;border-radius:8px}
+::-webkit-scrollbar-thumb:hover{background:#aeb7c6}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ===== 顶栏 ===== */
+.topbar{height:56px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;position:relative;z-index:50}
+.topbar .brand{font-size:16px;color:var(--ink-1);white-space:nowrap}
+.topbar .brand b{font-weight:600}
+.topbar .crumb{margin-left:28px;color:var(--ink-3);font-size:13px;padding-left:24px;border-left:1px solid var(--line);height:20px;display:flex;align-items:center;gap:8px}
+.topbar .crumb b{color:var(--ink-2);font-weight:400}
+.topbar .user{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink-2);padding-left:20px}
+.topbar .user .av{width:28px;height:28px;border-radius:50%;background:#eaf0f7;color:#4d6480;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12px}
+
+.layout{display:flex;height:calc(100vh - 56px);height:calc(100dvh - 56px);min-height:0}
+/* ===== 侧边栏(深色) ===== */
+.sidebar{width:208px;flex-shrink:0;background:#202c3d;padding:12px 0 20px;overflow:auto}
+.sg-title{padding:18px 24px 8px;font-size:12px;color:#9ba9bc;font-weight:400}
+.sg-title:first-child{padding-top:8px}
+.mi{padding:8px 24px;border-left:3px solid transparent;cursor:pointer;color:#ced6e2;font-size:13px;min-height:36px;display:flex;align-items:center;transition:background .15s,color .15s}
+.mi:hover{background:#2a384c;color:#fff}
+.mi.active{background:#30435e;border-left-color:#7fa7df;color:#fff;font-weight:500}
+
+.content{flex:1;padding:24px;overflow:auto;background:var(--bg);min-width:0}
+
+/* ===== 页头 ===== */
+.page-head{margin-bottom:20px}
+.page-head h1{font-size:20px;line-height:28px;font-weight:600;color:var(--ink-1)}
+.workflow-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;border:1px solid var(--line);border-radius:4px;background:#fff}
+.workflow-bar .details{flex:1;color:var(--ink-2);font-size:13px}
+.workflow-bar.readonly{background:#faf6ee;border-color:#e9dcc3}
+.upload-info{font-size:12px;color:var(--ink-3);margin-bottom:12px;overflow-wrap:anywhere}
+.upload-error{color:var(--danger);font-size:13px;margin:12px 0;white-space:pre-wrap}
+.import-note{font-size:13px;color:var(--ink-2);margin:12px 0}
+
+/* ===== 面板 / 卡片 ===== */
+.panel{background:var(--card);border-radius:6px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
+.panel>.filter-bar{margin:20px 20px 0}
+.panel>.tbl{margin:0 20px}
+.panel>.pg-bar{margin:0 20px 16px}
+
+/* ===== 页签 ===== */
+.tab-nav{display:flex;gap:28px;border-bottom:1px solid var(--line);padding:0 20px;background:#fff;overflow-x:auto}
+.tab-nav-item{padding:14px 0;cursor:pointer;font-size:14px;color:var(--ink-2);border-bottom:2px solid transparent;font-weight:400;transition:color .15s;white-space:nowrap}
+.tab-nav-item:hover{color:var(--pri)}
+.tab-nav-item.active{color:var(--pri);border-bottom-color:var(--pri);font-weight:600}
+.tab-pane{display:none;padding:20px}
+.tab-pane.active{display:block}
+.sub-nav{display:flex;gap:26px;border-bottom:1px solid var(--line);padding:0}
+.sub-nav-item{padding:11px 2px;cursor:pointer;font-size:13px;color:var(--ink-2);border-bottom:2px solid transparent;transition:color .15s}
+.sub-nav-item.active{color:var(--pri);border-bottom-color:var(--pri);font-weight:500}
+.sub-nav-item:hover{color:var(--pri)}
+.sub-pane{display:none;padding:16px 0;flex:1;overflow:auto}
+.sub-pane.active{display:flex;flex-direction:column}
+
+/* ===== 工具条 / 输入 ===== */
+.filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:0 0 16px}
+.filter-bar .grow{flex:1}
+.field{display:inline-flex;align-items:center;gap:8px;font-size:13px;max-width:100%}
+.field .lbl{color:var(--ink-2);font-size:13px;white-space:nowrap}
+.ipt,.sel{padding:5px 10px;border:1px solid #d6dde6;border-radius:4px;background:#fff;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;width:150px;min-width:0;color:var(--ink-1);height:32px}
+.ipt::placeholder{color:var(--ink-4)}
+.ipt:hover,.sel:hover{border-color:#9aa5b5}
+.ipt:focus,.sel:focus{border-color:var(--pri);box-shadow:0 0 0 2px rgba(40,93,168,.12)}
+.ipt.sm,.sel.sm{width:100px;padding:5px 8px;height:32px}
+.ipt.block,.sel.block{width:100%;min-width:0}
+textarea.ipt{min-height:80px;height:auto;font-family:inherit;resize:vertical}
+.sel{cursor:pointer}
+
+/* ===== 按钮 ===== */
+.btn{padding:6px 14px;border:1px solid #d6dde6;background:#fff;color:var(--ink-2);border-radius:4px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,border-color .15s,color .15s;font-weight:400;height:32px;line-height:1;white-space:nowrap}
+.btn:hover{color:var(--pri);border-color:#8aa8ce;background:#f6f9fc}
+.btn.primary{background:var(--pri);border-color:var(--pri);color:#fff}
+.btn.primary:hover{background:var(--pri-2);border-color:var(--pri-2);color:#fff}
+.btn.success{background:#f1f7f3;border-color:#bed4c7;color:var(--ok)}
+.btn.success:hover{background:#e7f1eb;border-color:var(--ok)}
+.btn.danger{background:#fff;border-color:#e4bec1;color:var(--danger)}
+.btn.danger:hover{background:#fcf1f2;border-color:var(--danger);color:var(--danger)}
+.btn.accent,.btn.warn{background:#fff;border-color:#aac0dd;color:var(--pri)}
+.btn.accent:hover,.btn.warn:hover{background:#f0f5fb;border-color:var(--pri);color:var(--pri)}
+.count{padding-left:7px;border-left:1px solid #c8d6e7;font-size:12px;font-variant-numeric:tabular-nums}
+.btn.sm{padding:3px 8px;font-size:12px;height:26px}
+.btn.link{border:none;background:transparent;color:var(--pri);padding:0 2px;box-shadow:none;height:auto}
+.btn.link:hover{background:transparent;color:var(--pri-2);text-decoration:underline;box-shadow:none}
+.btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+
+/* ===== 表格 ===== */
+.tbl{border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:560px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#f6f8fa;color:var(--ink-2);font-weight:500;text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;font-size:13px;z-index:2}
+thead th:first-child{padding-left:18px}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;transition:background .15s ease}
+tbody td:first-child{padding-left:18px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#f7f9fc}
+tbody tr.fail td{background:#fef1f1}
+tbody tr.fail:hover td{background:#fde6e6}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+td.center{text-align:center}
+.mono{font-family:"Cascadia Code",Consolas,monospace;font-size:12px;color:#3d4a63}
+.ellipsis{max-width:200px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:middle;white-space:nowrap}
+td.op{white-space:nowrap}
+td.op .btn+.btn{margin-left:4px}
+
+/* ===== 状态徽标 ===== */
+.st{display:inline-block;padding:1px 7px;border-radius:3px;font-size:12px;line-height:1.6;border:1px solid;font-weight:400;white-space:nowrap}
+.st.gray{color:#647184;background:#f4f6f8;border-color:#e4e8ed}
+.st.warn{color:var(--warn);background:#faf6ee;border-color:#e9dcc3}
+.st.fail{color:var(--danger);background:#fcf1f2;border-color:#edd2d4}
+.st.ok{color:var(--ok);background:#f0f7f3;border-color:#d0e2d8}
+.st.info{color:var(--pri);background:#f0f5fb;border-color:#d0deef}
+.st.purple{color:var(--purple);background:#f5f5f9;border-color:#dedeea}
+
+/* ===== 分页 ===== */
+.pg-bar{display:flex;align-items:center;padding:14px 4px 4px;font-size:13px;color:var(--ink-2)}
+.pg-bar .info{margin-right:auto;color:var(--ink-3)}
+.pg-bar .pg{min-width:30px;height:30px;line-height:28px;text-align:center;padding:0 10px;border:1px solid var(--line);border-radius:4px;cursor:pointer;background:#fff;margin-left:6px;transition:all .15s ease}
+.pg-bar .pg:hover{color:var(--pri);border-color:var(--pri)}
+.pg-bar .pg.active{background:#f0f5fb;border-color:var(--pri);color:var(--pri)}
+
+/* ===== 弹窗 ===== */
+.mask{position:fixed;inset:0;background:rgba(24,35,50,.4);display:none;align-items:center;justify-content:center;z-index:1000}
+.mask.show{display:flex}
+.dlg{background:#fff;border-radius:6px;width:720px;max-width:92vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(24,35,50,.18)}
+.dlg.wide{width:880px}
+.dlg-head{padding:16px 22px;border-bottom:1px solid var(--line-2);display:flex;align-items:center}
+.dlg-head h3{font-size:16px;font-weight:600;color:var(--ink-1);display:flex;align-items:center;gap:9px}
+.dlg-head .close{margin-left:auto;cursor:pointer;color:var(--ink-3);font-size:16px;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s ease}
+.dlg-head .close:hover{color:var(--danger);background:#fef1f1}
+.dlg-body{padding:20px 22px;overflow:auto;flex:1}
+.dlg-foot{padding:16px 22px;border-top:1px solid var(--line-2);display:flex;justify-content:flex-end;gap:10px;background:#fff}
+
+/* ===== 表单 ===== */
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 18px}
+.form .full{grid-column:1/-1}
+.form .fg{display:flex;flex-direction:column;gap:5px}
+.form .fg .lbl{font-size:13px;color:var(--ink-2);font-weight:500;display:flex;align-items:center;gap:2px}
+.form .fg .lbl .req{color:var(--danger)}
+.form .fg .ipt,.form .fg .sel{width:100%}
+.form .fg .help{font-size:12px;color:var(--ink-3);margin-top:2px}
+
+/* ===== SQL 编辑器 ===== */
+.sql-edit{background:#1c2331;color:#d4d7de;padding:14px 16px;border-radius:8px;font-family:"Cascadia Code",Consolas,monospace;font-size:13px;line-height:1.7;border:1px solid #141a26;width:100%;min-height:280px;resize:vertical;outline:none;white-space:pre;overflow:auto}
+.sql-edit:focus{box-shadow:0 0 0 3px rgba(22,100,255,.18)}
+
+/* ===== SQL 双栏 ===== */
+.sql-layout{display:flex;gap:16px;min-height:600px;align-items:stretch}
+.sql-list{width:260px;flex-shrink:0;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.sql-list-head{padding:14px 16px;border-bottom:1px solid var(--line-2);background:#fbfcfe}
+.sql-list-search{width:100%}
+.sql-list-body{overflow:auto;flex:1}
+.sql-list-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid #f4f5f8;border-left:3px solid transparent;transition:background .15s ease}
+.sql-list-item:hover{background:#f6f9ff}
+.sql-list-item.active{background:#eef4ff;border-left-color:var(--pri)}
+.sql-list-item .nm{font-size:13px;color:var(--ink-1);font-weight:500;margin-bottom:4px}
+.sql-list-item .cd{font-size:11px;color:var(--ink-3);font-family:"Cascadia Code",Consolas,monospace}
+.sql-list-item .mt{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;align-items:center}
+.sql-detail{flex:1;background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);min-width:0}
+.sql-detail-head{padding:16px 20px;border-bottom:1px solid var(--line-2);background:#fbfcfe;display:flex;align-items:center;gap:12px}
+.sql-detail-head .tt{font-size:15px;color:var(--ink-1);font-weight:600}
+.sql-detail-head .cd{color:var(--ink-3);font-size:12px;font-family:"Cascadia Code",Consolas,monospace;margin-top:2px}
+.sql-detail-head .right{margin-left:auto;display:flex;gap:8px}
+.sql-detail .sub-nav{padding:0 20px}
+.sql-detail .sub-pane{padding:18px 20px}
+
+/* ===== 操作条 ===== */
+.acquire-bar{display:flex;align-items:center;gap:16px;padding:16px;background:#f7f9fb;border:1px solid var(--line-2);border-radius:4px;margin-bottom:20px;flex-wrap:wrap}
+.acquire-bar .ipt,.acquire-bar .sel{background:#fff}
+.acquire-bar .lbl{color:var(--ink-2);font-size:13px;font-weight:500}
+.acquire-bar .right{margin-left:auto;display:flex;gap:8px}
+
+/* ===== 汇总卡 ===== */
+.summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.summary .cell{background:#fff;padding:14px 16px;border-radius:4px;border:1px solid var(--line);min-width:0}
+.summary .cell .lbl{font-size:12px;color:var(--ink-3);margin-bottom:6px}
+.summary .cell .val{font-size:20px;color:var(--ink-1);font-weight:600;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.dlg .summary .cell{padding:12px}
+.dlg .summary .cell .val{font-size:16px}
+.summary .cell.ok .val{color:var(--ok)}
+.summary .cell.warn .val{color:var(--warn)}
+
+/* ===== 试跑结果 ===== */
+.test-result{margin-top:14px;background:#1c2331;color:#d4d7de;padding:14px 16px;border-radius:8px;font-family:"Cascadia Code",Consolas,monospace;font-size:12px;line-height:1.7;max-height:320px;overflow:auto;white-space:pre}
+.test-result .ts{color:#569cd6}
+.test-result .ok{color:#4ec9b0;font-weight:600}
+.test-result .err{color:#f48771;font-weight:600}
+.test-result .k{color:#c586c0}
+.param-form{background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.param-form .row{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.param-form .row:last-child{margin-bottom:0}
+
+/* ===== 空态 / 提示 ===== */
+.empty{padding:52px 0;text-align:center;color:var(--ink-3);font-size:13px}
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);padding:10px 20px;background:#344258;color:#fff;border-radius:4px;font-size:13px;z-index:9999;opacity:0;transition:opacity .2s ease;pointer-events:none;box-shadow:0 4px 16px rgba(24,35,50,.12);display:flex;align-items:center;gap:6px;max-width:90vw}
+.toast.show{opacity:1}
+.toast.success{background:var(--ok)}
+.toast.error{background:var(--danger)}
+
+/* ===== 上传区 ===== */
+.upload-zone{border:1px dashed #bdc9d8;border-radius:4px;padding:24px;text-align:center;background:#fafbfc;transition:border-color .15s}
+.upload-zone:hover{border-color:var(--pri)}
+.upload-zone .tt{font-size:14px;color:var(--ink-1);margin-bottom:4px;font-weight:500}
+.upload-zone .sub{font-size:12px;color:var(--ink-3)}
+
+/* ===== 批次块 ===== */
+.b-block{border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:14px}
+.b-block h4{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:14px}
+.b-block h4 .idx{width:24px;height:24px;border-radius:50%;background:#eaf1ff;color:var(--pri);display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:12px}
+.b-block .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.b-block .gf{background:#f8fafc;border:1px solid var(--line-2);border-radius:6px;padding:8px 12px}
+.b-block .gf .lbl{font-size:11px;color:var(--ink-3);margin-bottom:4px}
+.b-block .gf .val{font-size:13px;color:var(--ink-1);font-weight:500}
+.b-block .res{background:#f8fafc;border:1px solid var(--line-2);border-radius:6px;padding:10px 12px;margin-top:10px;min-height:56px;font-size:12px;color:var(--ink-2);white-space:pre-wrap;word-break:break-all}
+
+/* ===== 凭证展开 ===== */
+.v-det td{background:#f8fafc!important;padding:0}
+.v-det-inner{padding:12px 18px;background:#f8fafc;border-top:1px dashed var(--line);font-size:12px}
+.v-det-inner .ttl{color:var(--ink-2);margin-bottom:8px;font-weight:500}
+.kv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 16px;color:var(--ink-2)}
+.kv-grid .kv .k{color:var(--ink-3);margin-right:4px}
+.kv-grid .kv .v{color:var(--ink-1);font-family:"Cascadia Code",Consolas,monospace}
+
+/* ===== 信息卡 ===== */
+.info-card{background:#f7f9fb;border:1px solid var(--line);border-radius:4px;padding:16px 20px;margin-bottom:16px;display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--ink-1)}
+.info-card .item{display:flex;flex-direction:column;gap:2px}
+.info-card .item .lbl{font-size:11px;color:var(--ink-3)}
+.info-card .item .val{font-size:14px;font-weight:600;color:var(--ink-1)}
+
+/* ===== 合并对比 ===== */
+.merge-compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.merge-compare .src{border:1px solid var(--line);border-radius:8px;padding:12px;background:#f8fafc}
+.merge-compare .src .hd{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:13px;font-weight:500}
+.merge-compare .src .hd .dot{width:8px;height:8px;border-radius:50%}
+.merge-compare .src .nm{color:var(--ink-3);font-size:11px;margin-bottom:8px}
+.merge-compare .src.ok{border-color:#a9e3b3;background:#e9f9ec}
+.merge-compare .src.warn{border-color:#ffdba8;background:#fff5e6}
+.merge-compare .src.err{border-color:#fac5c5;background:#feecee}
+.source-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;background:#f7f9fb;border:1px solid var(--line);border-radius:4px;font-size:13px;color:var(--ink-2)}
+.merge-box{margin-bottom:20px;border:1px solid var(--line);border-radius:4px;padding:16px}
+.merge-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.merge-head h3{font-size:14px;font-weight:500}
+.merge-head p{font-size:12px;color:var(--ink-3)}
+.merge-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.merge-cell{padding:14px 16px;background:#f7f9fb;border:1px solid var(--line-2);border-radius:4px}
+.merge-cell.result{background:#f0f5fb;border-color:#d0deef}
+.merge-cell h4{font-size:13px;font-weight:500;margin-bottom:8px}
+.merge-cell p{color:var(--ink-3);font-size:12px;margin-bottom:8px}
+.merge-cell .amount{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.merge-cell .amount small{font-size:12px;font-weight:400;color:var(--ink-3);margin-left:4px}
+@media(max-width:1200px){
+  .sidebar{width:180px}
+  .content{padding:20px}
+  .tab-nav{gap:24px}
+  .sql-list{width:220px}
+  .sql-detail-head{flex-wrap:wrap}
+  .summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:800px){
+  .sidebar{width:156px}
+  .mi{padding-left:18px;padding-right:12px}
+  .sg-title{padding-left:21px}
+  .content{padding:16px}
+  .topbar{padding:0 16px}
+  .topbar .crumb{display:none}
+  .topbar .user>span{display:none}
+  .tab-pane{padding:16px}
+  .acquire-bar .right{flex-wrap:wrap}
+  .sql-layout{flex-direction:column}
+  .sql-list{width:100%;max-height:260px}
+  .merge-grid,.summary{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="brand"><b>智能财务月结系统</b></div>
-  <div class="crumb">月结管理 / <b id="crumbMain">结转二</b></div>
+  <div class="crumb"><span id="crumbGroup">月结管理</span> / <b id="crumbMain">结转二</b></div>
   <div class="user">
-    <span>W8406768@XZ</span>
-    <div class="av">黄</div>
+    <label for="demoAccount">演示账号</label>
+    <select class="sel" id="demoAccount" aria-label="切换演示账号" onchange="switchAccount(this.value)">
+      <option value="W8406768@XZ">W8406768@XZ</option>
+      <option value="W8406769@XZ">W8406769@XZ</option>
+    </select>
   </div>
 </div>
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="sg-title">九大业务自动化</div>
-    <div class="mi" data-page="biz" data-code="settle01">结转一</div>
-    <div class="mi active" data-page="biz" data-code="settle02">结转二</div>
-    <div class="mi" data-page="biz" data-code="settle03">非现金流</div>
-    <div class="mi" data-page="biz" data-code="settle04">滞纳金</div>
-    <div class="mi" data-page="biz" data-code="settle05">呆坏账</div>
-    <div class="mi" data-page="biz" data-code="settle06">欠费 <span class="tag">B类</span></div>
-    <div class="mi" data-page="biz" data-code="settle07">坏账计提 <span class="tag">B类</span></div>
-    <div class="mi" data-page="biz" data-code="settle08">营业款</div>
-    <div class="mi" data-page="biz" data-code="settle09">预存款</div>
+    <div class="sg-title">月结业务</div>
+    <div class="mi" data-page="biz" data-code="settle01"><span class="tx">结转一</span></div>
+    <div class="mi active" data-page="biz" data-code="settle02"><span class="tx">结转二</span></div>
+    <div class="mi" data-page="biz" data-code="settle03"><span class="tx">非现金流</span></div>
+    <div class="mi" data-page="biz" data-code="settle04"><span class="tx">滞纳金</span></div>
+    <div class="mi" data-page="biz" data-code="settle05"><span class="tx">呆坏账</span></div>
+    <div class="mi" data-page="biz" data-code="settle06"><span class="tx">欠费</span></div>
+    <div class="mi" data-page="biz" data-code="settle07"><span class="tx">坏账计提</span></div>
+    <div class="mi" data-page="biz" data-code="settle08"><span class="tx">营业款</span></div>
+    <div class="mi" data-page="biz" data-code="settle09"><span class="tx">预存款</span></div>
 
-    <div class="sg-title" style="margin-top:10px;">基础配置</div>
-    <div class="mi" data-page="dsm">数据源管理</div>
-    <div class="mi" data-page="sql">SQL 模板</div>
-    <div class="mi" data-page="proc">加工脚本配置</div>
-    <div class="mi" data-page="sap">SAP 字段字典</div>
-    <div class="mi" data-page="acct">科目 / 利润中心</div>
-    <div class="mi" data-page="bcdict">业务编码字典</div>
+    <div class="sg-title">基础配置</div>
+    <div class="mi" data-page="dsm"><span class="tx">数据源管理</span></div>
+    <div class="mi" data-page="sql"><span class="tx">SQL 模板</span></div>
+    <div class="mi" data-page="proc"><span class="tx">加工脚本配置</span></div>
+    <div class="mi" data-page="sap"><span class="tx">SAP 字段字典</span></div>
+    <div class="mi" data-page="acct"><span class="tx">科目 / 利润中心</span></div>
+    <div class="mi" data-page="bcdict"><span class="tx">业务编码字典</span></div>
 
-    <div class="sg-title" style="margin-top:10px;">系统</div>
-    <div class="mi" data-page="oplog">操作日志</div>
-    <div class="mi" data-page="snap">业务快照</div>
+    <div class="sg-title">系统管理</div>
+    <div class="mi" data-page="oplog"><span class="tx">操作日志</span></div>
+    <div class="mi" data-page="snap"><span class="tx">业务快照</span></div>
   </aside>
 
   <main class="content">
@@ -258,29 +340,41 @@
 <div class="mask" id="dlgAudit"><div class="dlg" style="width:520px;">
   <div class="dlg-head"><h3>数据详情</h3><span class="close" onclick="closeDlg('dlgAudit')">✕</span></div>
   <div class="dlg-body"><div class="summary" style="grid-template-columns:repeat(2,1fr);" id="dlgAuditBody"></div>
-  <div style="margin-top:14px;padding:10px 12px;background:#f7f8fa;border-radius:4px;color:#4e5969;font-size:13px;">
-    💡 审核请使用工具栏的 <b style="color:#165dff;">批量审核</b> 按账期一次性处理
+  <div style="margin-top:14px;padding:10px 12px;background:#f7f8fa;border-radius:4px;color:var(--ink-2);font-size:13px;">
+    批量审核请返回列表操作。
   </div></div>
   <div class="dlg-foot"><button class="btn primary" onclick="closeDlg('dlgAudit')">关闭</button>
-    <button class="btn danger" onclick="auditConfirm(0)">仅驳回此条</button></div>
+    <button class="btn danger" data-biz-action onclick="auditConfirm(0)">仅驳回此条</button></div>
 </div></div>
 
 <div class="mask" id="dlgBatch"><div class="dlg" style="width:560px;">
-  <div class="dlg-head"><h3>批量审核 — 本次账单</h3><span class="close" onclick="closeDlg('dlgBatch')">✕</span></div>
+  <div class="dlg-head"><h3>批量审核</h3><span class="close" onclick="closeDlg('dlgBatch')">✕</span></div>
   <div class="dlg-body" id="dlgBatchBody"></div>
   <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgBatch')">取消</button>
-    <button class="btn danger" onclick="batchConfirm(0)">✗ 全部驳回</button>
-    <button class="btn success" onclick="batchConfirm(1)">✓ 全部通过</button></div>
+    <button class="btn danger" data-biz-action onclick="batchConfirm(0)">全部驳回</button>
+    <button class="btn primary" data-biz-action onclick="batchConfirm(1)">全部通过</button></div>
 </div></div>
 
 <div class="mask" id="dlgPost"><div class="dlg">
-  <div class="dlg-head"><h3>过账详情</h3><span class="close" onclick="closeDlg('dlgPost')">✕</span></div>
+  <div class="dlg-head"><h3>详细日志</h3><span class="close" onclick="closeDlg('dlgPost')">✕</span></div>
   <div class="dlg-body"><div style="display:flex;justify-content:space-between;margin-bottom:12px;">
-    <div style="font-weight:600;font-size:14px;">批次明细</div>
-    <div style="color:#86909c;font-size:13px;">共 <b id="dlgPostCnt" style="color:#1d2129;">2</b> 条</div></div>
+    <div style="font-weight:600;font-size:14px;">处理流程</div>
+    <div style="color:var(--ink-3);font-size:13px;">共 <b id="dlgPostCnt" style="color:var(--ink-1);">6</b> 个环节</div></div>
     <div id="dlgPostBody"></div></div>
   <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgPost')">关闭</button>
-    <button class="btn primary" onclick="toast('已重新过账','success');closeDlg('dlgPost')">🔁 重新过账</button></div>
+    <button class="btn primary" data-biz-action id="retryPosting" onclick="retryPosting()">重新过账</button></div>
+</div></div>
+
+<div class="mask" id="dlgVoucherUpload"><div class="dlg wide">
+  <div class="dlg-head"><h3>上传调整凭证</h3><span class="close" onclick="closeDlg('dlgVoucherUpload')">✕</span></div>
+  <div class="dlg-body">
+    <p class="import-note">请上传本页导出并调整后的 UTF-8 CSV 文件（最多 5 MB、10,000 行），保留表头、业务编码和账期。Excel 编辑后请另存为 CSV UTF-8。</p>
+    <input type="file" data-biz-action id="voucherFile" accept=".csv,text/csv" onchange="previewVoucherFile(this.files[0])" />
+    <div id="voucherUploadError" class="upload-error" role="alert"></div>
+    <div id="voucherPreview"></div>
+  </div>
+  <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgVoucherUpload')">取消</button>
+    <button class="btn primary" data-biz-action id="confirmVoucherUpload" disabled onclick="confirmVoucherUpload()">确认替换并送审</button></div>
 </div></div>
 
 <!-- 数据源编辑/新增弹窗 -->
@@ -288,13 +382,13 @@
   <div class="dlg-head"><h3 id="dlgDSMETitle">新增数据源</h3><span class="close" onclick="closeDlg('dlgDSME')">✕</span></div>
   <div class="dlg-body" id="dlgDSMEBody">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;">
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">编码 <span style="color:#f53f3f;">*</span></div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">编码 <span style="color:var(--danger);">*</span></div>
         <input class="ipt block" id="dsmCode" placeholder="如 ads_mysql, master, slave" />
       </div>
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">名称 <span style="color:#f53f3f;">*</span></div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">名称 <span style="color:var(--danger);">*</span></div>
         <input class="ipt block" id="dsmName" placeholder="如 数据门户(广告库)" />
       </div>
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">数据库类型 <span style="color:#f53f3f;">*</span></div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">数据库类型 <span style="color:var(--danger);">*</span></div>
         <select class="sel block" id="dsmType">
           <option value="MYSQL">MYSQL</option>
           <option value="POSTGRESQL">POSTGRESQL</option>
@@ -302,7 +396,7 @@
           <option value="REDIS">REDIS</option>
         </select>
       </div>
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">分组 <span style="color:#f53f3f;">*</span></div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">分组 <span style="color:var(--danger);">*</span></div>
         <select class="sel block" id="dsmGroup">
           <option value="数据门户">数据门户</option>
           <option value="业务生产">业务生产</option>
@@ -310,39 +404,39 @@
           <option value="缓存/其它">缓存/其它</option>
         </select>
       </div>
-      <div style="grid-column:1/-1;"><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">JDBC URL <span style="color:#f53f3f;">*</span></div>
+      <div style="grid-column:1/-1;"><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">JDBC URL <span style="color:var(--danger);">*</span></div>
         <input class="ipt block mono" id="dsmUrl" placeholder="jdbc:mysql://host:port/database 或 redis://host:port/db" />
       </div>
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">用户名</div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">用户名</div>
         <input class="ipt block" id="dsmUser" placeholder="数据库登录用户" />
       </div>
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">密码 <span id="dsmPwdHint" style="color:#86909c;font-weight:400;">(留空表示不修改)</span></div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">密码 <span id="dsmPwdHint" style="color:var(--ink-3);font-weight:400;">(留空表示不修改)</span></div>
         <input class="ipt block" type="password" id="dsmPwd" placeholder="数据库密码" />
       </div>
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">连接池 - 最小</div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">连接池 - 最小</div>
         <input class="ipt block" type="number" id="dsmPoolMin" value="2" min="0" />
       </div>
-      <div><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">连接池 - 最大</div>
+      <div><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">连接池 - 最大</div>
         <input class="ipt block" type="number" id="dsmPoolMax" value="8" min="1" />
       </div>
-      <div style="grid-column:1/-1;"><div style="font-size:12px;color:#4e5969;margin-bottom:4px;">备注</div>
+      <div style="grid-column:1/-1;"><div style="font-size:12px;color:var(--ink-2);margin-bottom:4px;">备注</div>
         <input class="ipt block" id="dsmRemark" placeholder="数据源用途说明" />
       </div>
       <div style="grid-column:1/-1;display:flex;gap:18px;align-items:center;padding:10px 12px;background:#f7f8fa;border-radius:4px;">
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#1d2129;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--ink-1);">
           <input type="checkbox" id="dsmState" checked /> 启用
         </label>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#1d2129;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--ink-1);">
           <input type="checkbox" id="dsmTest" checked /> 保存时立即测试连接
         </label>
-        <span style="color:#86909c;font-size:12px;">· 测试失败仍可保存为禁用状态</span>
+        <span style="color:var(--ink-3);font-size:12px;">· 测试失败仍可保存为禁用状态</span>
       </div>
     </div>
   </div>
   <div class="dlg-foot">
     <button class="btn" onclick="closeDlg('dlgDSME')">取消</button>
-    <button class="btn warn" onclick="testDSME()">🧪 测试连接</button>
-    <button class="btn primary" onclick="saveDSME()">💾 保存</button>
+    <button class="btn warn" onclick="testDSME()">测试连接</button>
+    <button class="btn primary" onclick="saveDSME()">保存</button>
   </div>
 </div></div>
 
@@ -522,6 +616,7 @@ const EDA_DATA = [
   {mid:'EDA@891;20260311144937;58628;01',file:'DAPM_MSS_INCOME.20260311.202509.06.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'-',ts:'2026-03-11 14:49:37',c:'未采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'},
   {mid:'EDA@891;20260311140908;03429;01',file:'DAPM_MSS_INCOME.20260311.202509.06.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'-',ts:'2026-03-11 14:09:08',c:'未采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'}
 ];
+for(const b of Object.values(BIZ)) b.eda=EDA_DATA.map(row=>({...row}));
 
 const DSM = [
   {id:1,code:'ads_mysql',name:'数据门户(广告库)',db_type:'MYSQL',jdbc_url:'jdbc:mysql://10.18.0.21:3306/ads_db',username:'ads_reader',pool_min:2,pool_max:8,group:'数据门户',state:1,update_time:'2026-09-12 14:23:11'},
@@ -704,13 +799,27 @@ const SNAPSHOTS = [
 
 // ====================== 通用工具 ======================
 function fmt(n,d=2){return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function statusClass(value){
+  if(['成功','已通过','已采集','校验通过'].includes(value))return 'ok';
+  if(['失败','通知失败','校验失败','已驳回'].includes(value))return 'fail';
+  return !value||value==='-'||value==='未采集'?'gray':'warn';
+}
 function st(t,k='gray'){return `<span class="st ${k}">${t}</span>`}
+function pageHead(title){return `<div class="page-head"><h1>${title}</h1></div>`}
 let _tt=null;
 function toast(msg,k=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+k;if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),1800)}
-function closeDlg(id){document.getElementById(id).classList.remove('show')}
+function closeDlg(id){
+  document.getElementById(id).classList.remove('show');
+  if(id==='dlgVoucherUpload'){uploadContext=null;pendingImport=null;uploadSequence++}
+  if(id==='dlgBatch')batchTarget=null;
+}
 
 // ====================== 菜单切换 ======================
+const CRUMB_GROUP={biz:'月结管理',dsm:'基础配置',sql:'基础配置',proc:'基础配置',sap:'基础配置',acct:'基础配置',bcdict:'基础配置',oplog:'系统',snap:'系统'};
 function goMenu(page, code){
+  closeBusinessDialogs();
+  currentPage=page;
   document.querySelectorAll('.sidebar .mi').forEach(el=>el.classList.remove('active'));
   const target=document.querySelector(`.sidebar .mi[data-page="${page}"][data-code="${code||''}"]`) ||
                document.querySelector(`.sidebar .mi[data-page="${page}"]:not([data-code])`);
@@ -725,8 +834,10 @@ function goMenu(page, code){
   else if(page==='oplog') renderOpLog();
   else if(page==='snap') renderSnap();
   if(target){
-    const txt = target.textContent.trim();
+    const txt = (target.querySelector('.tx')?.textContent || target.textContent).trim();
     document.getElementById('crumbMain').textContent = txt;
+    const g = CRUMB_GROUP[page];
+    if(g) document.getElementById('crumbGroup').textContent = g;
   }
 }
 document.querySelectorAll('.sidebar .mi').forEach(el=>{
@@ -735,19 +846,182 @@ document.querySelectorAll('.sidebar .mi').forEach(el=>{
 
 // ====================== 九大业务页面 ======================
 let curBiz='settle02';
+let currentPage='biz';
 let auditTarget=null;
+let batchTarget=null;
 const expanded={};
+const DEMO_ACCOUNTS=['W8406768@XZ','W8406769@XZ'];
+let currentUser=DEMO_ACCOUNTS[0];
+try{
+  const saved=sessionStorage.getItem('finance-demo-account');
+  if(DEMO_ACCOUNTS.includes(saved))currentUser=saved;
+}catch{}
+let storageFault=false;
+let applyingBusinessAction=false;
+let lastWorkflowState='';
+function workflowKey(code=curBiz){return `finance-workflow-v1:${BIZ[code].code}:${BIZ[code].period}`}
+function readWorkflow(code=curBiz){
+  const raw=localStorage.getItem(workflowKey(code));
+  if(!raw)return {owner:null,token:null,acquiredAt:null,data:null};
+  const state=JSON.parse(raw);
+  if(!state||!('owner' in state)||state.owner!==null&&!DEMO_ACCOUNTS.includes(state.owner)||
+     state.owner&&typeof state.token!=='string'||!state.data||
+     !Array.isArray(state.data.v1)||!Array.isArray(state.data.t1)||!Array.isArray(state.data.eda))
+    throw new Error('业务状态无法读取');
+  return state;
+}
+function businessData(code=curBiz){
+  const b=BIZ[code];
+  return {t1:b.t1,v1:b.v1,eda:b.eda,excel_data:b.excel_data,excel_files:b.excel_files,voucherUpload:b.voucherUpload};
+}
+function hydrateBusiness(state,code=curBiz){if(state.data)Object.assign(BIZ[code],structuredClone(state.data))}
+function currentAccess(){
+  try{return readWorkflow()}catch{storageFault=true;return null}
+}
+function ownsBusiness(){
+  const state=currentAccess();
+  return !storageFault&&state?.owner===currentUser;
+}
+function requireBusinessOwner(){
+  if(ownsBusiness())return true;
+  updateBusinessAccess();
+  toast(storageFault?'浏览器存储不可用，无法执行操作':'请先申请出账；业务被其他账号占用时仅可查看','error');
+  return false;
+}
+function closeBusinessDialogs(){
+  ['dlgAudit','dlgBatch','dlgPost','dlgVoucherUpload'].forEach(closeDlg);
+  auditTarget=null;postingTarget=null;
+}
+function updateBusinessAccess(){
+  const bar=document.getElementById('workflowBar');
+  if(!bar)return;
+  const state=currentAccess();
+  const own=!storageFault&&state?.owner===currentUser;
+  bar.classList.toggle('readonly',!own&&Boolean(state?.owner));
+  const text=storageFault?'浏览器存储不可用，当前只读':
+    !state?.owner?'尚未申请出账':own?`当前账号独占 · 申请时间 ${state.acquiredAt}`:`${state.owner} 正在出账，当前只读`;
+  bar.innerHTML=`<span class="st ${own?'info':'gray'}">${own?'出账中':'只读'}</span>
+    <div class="details">账期 ${BIZ[curBiz].period} · ${escapeHtml(text)}</div>
+    <button class="btn ${own?'':'primary'}" ${storageFault||!own&&state?.owner?'disabled':''} onclick="${own?'releaseWorkflow()':'claimWorkflow()'}">${own?'释放流程':'申请出账'}</button>`;
+  document.querySelectorAll('#bizPanel button:not([data-read]), #bizPanel input, #bizPanel select, #bizPanel textarea, [data-biz-action]').forEach(el=>el.disabled=!own);
+  const confirmButton=document.getElementById('confirmVoucherUpload');
+  confirmButton.disabled=!own||!pendingImport;
+  const row=postingTarget?.biz===curBiz?BIZ[curBiz].eda.find(r=>r.mid===postingTarget.mid):null;
+  document.getElementById('retryPosting').disabled=!own||!row||!['已通过','校验通过'].includes(row.v1);
+}
+async function workflowTransaction(code,action){
+  if(!navigator.locks){
+    toast('当前浏览器不支持流程锁，请使用最新版 Chrome 或 Edge','error');
+    return;
+  }
+  try{
+    await navigator.locks.request(workflowKey(code),()=>action());
+  }catch(error){
+    storageFault=true;
+    closeBusinessDialogs();refreshBusinessView();updateBusinessAccess();
+    toast('业务状态保存失败，已停止操作；请检查浏览器存储设置','error');
+  }
+}
+async function claimWorkflow(){
+  const code=curBiz,user=currentUser;
+  if(storageFault)return;
+  await workflowTransaction(code,()=>{
+    if(currentPage!=='biz'||curBiz!==code||currentUser!==user)return;
+    const state=readWorkflow(code);
+    if(state.owner&&state.owner!==user){refreshBusinessView();return toast(`${state.owner} 已申请出账，当前只读`,'error')}
+    hydrateBusiness(state,code);
+    state.owner=user;
+    state.token=state.token||crypto.randomUUID();
+    state.acquiredAt=state.acquiredAt||new Date().toLocaleString('sv-SE');
+    state.data=businessData(code);
+    localStorage.setItem(workflowKey(code),JSON.stringify(state));
+    refreshBusinessView();
+    toast('申请成功，当前账号独占此业务账期','success');
+  });
+}
+async function releaseWorkflow(){
+  if(!requireBusinessOwner()||!confirm('确认释放当前业务账期？释放后其他账号可申请出账。'))return;
+  const code=curBiz,user=currentUser,token=readWorkflow(code).token;
+  await workflowTransaction(code,()=>{
+    const state=readWorkflow(code);
+    if(state.owner!==user||state.token!==token||currentUser!==user)return;
+    state.owner=null;state.token=null;state.acquiredAt=null;
+    localStorage.setItem(workflowKey(code),JSON.stringify(state));
+    if(curBiz===code&&currentPage==='biz'){closeBusinessDialogs();refreshBusinessView()}
+    toast('流程已释放','success');
+  });
+}
+async function writeBusiness(action){
+  if(!requireBusinessOwner())return;
+  const code=curBiz,user=currentUser,token=readWorkflow(code).token;
+  await workflowTransaction(code,()=>{
+    const state=readWorkflow(code);
+    if(currentPage!=='biz'||curBiz!==code||currentUser!==user||state.owner!==user||state.token!==token)
+      return toast('流程归属已变化，操作已取消','error');
+    hydrateBusiness(state,code);
+    const previous=structuredClone(businessData(code));
+    applyingBusinessAction=true;
+    try{
+      action();
+      state.data=businessData(code);
+      localStorage.setItem(workflowKey(code),JSON.stringify(state));
+      lastWorkflowState=JSON.stringify(state);
+    }catch(error){
+      Object.assign(BIZ[code],previous);
+      throw error;
+    }finally{applyingBusinessAction=false}
+    updateBusinessAccess();
+  });
+}
+function refreshBusinessView(){
+  if(currentPage!=='biz')return;
+  const tab=document.querySelector('#bizPanel .tab-nav-item.active')?.dataset.tab||'t1';
+  const sub=document.querySelector('#bizPanel .sub-nav-item.active')?.dataset.sub||'s3';
+  const filters=['voucherBatch','voucherSide','kw3','fltSt'].map(id=>[id,document.getElementById(id)?.value||'']);
+  renderBiz(curBiz);
+  const tabEl=document.querySelector(`#bizPanel [data-tab="${tab}"]`);
+  if(tabEl)switchBizTab(tab,tabEl);
+  const subEl=document.querySelector(`#bizPanel [data-sub="${sub}"]`);
+  if(subEl)switchSub(sub,subEl);
+  for(const [id,value] of filters){const el=document.getElementById(id);if(el)el.value=value}
+  renderT2();renderT3();updateBusinessAccess();
+}
+function switchAccount(user){
+  if(!DEMO_ACCOUNTS.includes(user))return;
+  currentUser=user;
+  try{sessionStorage.setItem('finance-demo-account',user)}catch{}
+  closeBusinessDialogs();refreshBusinessView();
+}
+function syncWorkflow(){
+  if(currentPage!=='biz'||applyingBusinessAction)return;
+  const state=currentAccess();
+  if(!state){updateBusinessAccess();return}
+  if(JSON.stringify(state)!==lastWorkflowState){closeBusinessDialogs();refreshBusinessView()}
+}
+window.addEventListener('storage',event=>{if(event.key===null||event.key===workflowKey())syncWorkflow()});
+window.addEventListener('focus',syncWorkflow);
+for(const type of ['click','change','input'])document.addEventListener(type,event=>{
+  const control=event.target.closest?.('#bizPanel button:not([data-read]), #bizPanel input, #bizPanel select, #bizPanel textarea, [data-biz-action]');
+  if(control&&!requireBusinessOwner()){event.preventDefault();event.stopImmediatePropagation()}
+},true);
 
 function renderBiz(code){
   curBiz=code;
+  currentPage='biz';
+  if(!applyingBusinessAction){
+    const state=currentAccess();
+    if(state){hydrateBusiness(state);lastWorkflowState=JSON.stringify(state)}
+  }
   const b=BIZ[code];
   document.getElementById('root').innerHTML = `
-    <div class="panel">
+    ${pageHead(b.name)}
+    <div class="workflow-bar" id="workflowBar"></div>
+    <div class="panel" id="bizPanel">
       <div class="tab-nav">
-        <div class="tab-nav-item active" onclick="switchBizTab('t1',this)">获取数据与展示</div>
-        ${b.excel_required ? `<div class="tab-nav-item" onclick="switchBizTab('excel',this)">Excel 上传与审核</div>` : ''}
-        <div class="tab-nav-item" onclick="switchBizTab('t2',this)">加工数据与凭证</div>
-        <div class="tab-nav-item" onclick="switchBizTab('t3',this)">上传 EDA 与过账审核</div>
+        <div class="tab-nav-item active" data-tab="t1" onclick="switchBizTab('t1',this)">数据获取</div>
+        ${b.excel_required ? `<div class="tab-nav-item" data-tab="excel" onclick="switchBizTab('excel',this)">Excel 审核</div>` : ''}
+        <div class="tab-nav-item" data-tab="t2" onclick="switchBizTab('t2',this)">凭证加工</div>
+        <div class="tab-nav-item" data-tab="t3" onclick="switchBizTab('t3',this)">EDA 上传与过账</div>
       </div>
       <div class="tab-pane active" id="biz-t1">
         ${b.excel_required ? renderExcelUpload(b) : ''}
@@ -755,26 +1029,26 @@ function renderBiz(code){
           <div class="field"><span class="lbl">账期</span><input class="ipt" value="${b.period}" /></div>
           <div class="field"><span class="lbl">数据源</span><select class="sel"><option>ads_db (数据门户)</option></select></div>
           <div class="field"><span class="lbl">SQL 模板</span><select class="sel"><option>${b.sql_acquire||b.code+'_acquire'}</option></select></div>
-          <div class="right"><button class="btn primary" onclick="doAcquire()">▶ 开始取数</button></div>
+          <div class="right"><button class="btn primary" onclick="doAcquire()">开始取数</button></div>
         </div>
         <div class="filter-bar">
           <div class="field"><span class="lbl">账期</span><input class="ipt" value="${b.period}" /></div>
           <div class="field"><span class="lbl">本地网</span><select class="sel"><option>全部</option><option>891</option></select></div>
           <div class="field"><span class="lbl">金额</span><input class="ipt sm" placeholder="最小" style="min-width:90px;"/> — <input class="ipt sm" placeholder="最大" style="min-width:90px;"/></div>
           <div class="grow"></div>
-          <button class="btn warn" onclick="openBatchAudit()" style="padding:7px 18px;font-weight:500;">📋 审核 · 待审核 <b id="t1Pending">0</b> 条</button>
-          <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
-          <button class="btn" onclick="renderT1()">🔄 刷新</button>
+          <button class="btn accent" onclick="openBatchAudit()">批量审核 <span class="count" id="t1Pending">0</span></button>
+          <button class="btn" onclick="toast('已导出','success')">导出</button>
+          <button class="btn" onclick="renderT1()">刷新</button>
         </div>
         <div class="tbl"><table>
           <thead><tr>
-            <th style="width:40px;">#</th><th>month_no<br><span style="font-weight:400;color:#86909c;">账期</span></th>
-            <th>local_id<br><span style="font-weight:400;color:#86909c;">本地网</span></th>
-            <th>area_id<br><span style="font-weight:400;color:#86909c;">营业区ID</span></th>
-            <th>cdma_flag<br><span style="font-weight:400;color:#86909c;">主体</span></th>
-            <th class="num">fee<br><span style="font-weight:400;color:#86909c;">金额(分)</span></th>
-            <th>qd_name<br><span style="font-weight:400;color:#86909c;">类型</span></th>
-            <th>fee_type<br><span style="font-weight:400;color:#86909c;">备注</span></th>
+            <th style="width:60px;">序号</th><th title="month_no">账期</th>
+            <th title="local_id">本地网</th>
+            <th title="area_id">营业区 ID</th>
+            <th title="cdma_flag">主体</th>
+            <th class="num" title="fee">金额（分）</th>
+            <th title="qd_name">类型</th>
+            <th title="fee_type">备注</th>
             <th>状态</th>
           </tr></thead>
           <tbody id="t1Body"></tbody>
@@ -786,24 +1060,22 @@ function renderBiz(code){
       </div>
       ${b.excel_required ? `<div class="tab-pane" id="biz-excel">
         <div class="acquire-bar">
-          <div style="display:flex;align-items:center;gap:10px;color:#4e5969;font-size:13px;">
-            <span style="font-size:18px;">📤</span>
-            <span>集团侧数据(<b style="color:#1d2129;">${b.name}</b> · 账期 <b style="color:#1d2129;">${b.period}</b>)需财务人员手工上传 Excel,系统解析后进入审核流程</span>
+          <div style="display:flex;align-items:center;gap:10px;color:var(--ink-2);font-size:13px;">
+            <span>集团侧数据 <b>${b.period}</b></span>
           </div>
           <div class="right">
-            <button class="btn" onclick="toast('已下载 excel_template_def 模板','success')">📥 下载模板</button>
-            <button class="btn warn" onclick="simulateUpload()">📤 上传 Excel</button>
+            <button class="btn" onclick="toast('已下载 excel_template_def 模板','success')">下载模板</button>
+            <button class="btn primary" onclick="simulateUpload()">上传 Excel</button>
           </div>
         </div>
         <!-- 上传区域 -->
         <div class="upload-zone" style="margin-bottom:18px;">
-          <div class="ic">📂</div>
           <div class="tt">点击或拖拽 Excel 文件到此区域上传</div>
-          <div class="sub">支持 .xlsx / .xls 格式 · 单文件 ≤ 10MB · 模板字段定义见 excel_template_def</div>
+          <div class="sub">支持 .xlsx / .xls 格式，单文件不超过 10 MB</div>
         </div>
         <!-- 已上传文件列表 -->
-        <div style="font-size:13px;color:#4e5969;font-weight:500;margin-bottom:10px;">📁 已上传文件 (${b.excel_files.length})</div>
-        <div class="tbl" style="margin-bottom:18px;max-height:auto;"><table>
+        <div style="font-size:13px;color:var(--ink-2);font-weight:500;margin-bottom:10px;">已上传文件 (${b.excel_files.length})</div>
+        <div class="tbl" style="margin-bottom:18px;max-height:none;"><table>
           <thead><tr>
             <th style="width:40px;">#</th><th>文件名</th><th>账期</th><th>上传人</th><th>上传时间</th>
             <th>解析行数</th><th>文件大小</th><th>解析状态</th><th style="width:120px;">操作</th>
@@ -818,16 +1090,16 @@ function renderBiz(code){
               <td class="center">${f.rows}</td>
               <td>${f.size}</td>
               <td>${stEl(f.state,'ok')}</td>
-              <td class="op"><button class="btn sm link" onclick="toast('查看文件','success')">查看</button><button class="btn sm link" style="color:#f53f3f;" onclick="toast('已删除','success')">删除</button></td>
+              <td class="op"><button class="btn sm link" onclick="toast('查看文件','success')">查看</button><button class="btn sm link" style="color:var(--danger);" onclick="toast('已删除','success')">删除</button></td>
             </tr>
           `).join('')}</tbody>
         </table></div>
         <!-- 解析后数据 -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div style="font-size:13px;color:#4e5969;font-weight:500;">📋 Excel 解析后数据 (待审核) — 共 <b id="excelTotal">${b.excel_data.length}</b> 条</div>
+          <div style="font-size:13px;color:var(--ink-2);font-weight:500;">解析数据 · 共 <b id="excelTotal">${b.excel_data.length}</b> 条</div>
           <div style="display:flex;gap:8px;">
-            <button class="btn warn" onclick="openBatchExcelAudit()" style="padding:7px 18px;font-weight:500;">📋 审核 · 待审核 <b id="excelPending">0</b> 条</button>
-            <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
+            <button class="btn accent" onclick="openBatchExcelAudit()">批量审核 <span class="count" id="excelPending">0</span></button>
+            <button class="btn" onclick="toast('已导出','success')">导出</button>
           </div>
         </div>
         <div class="tbl"><table>
@@ -842,21 +1114,24 @@ function renderBiz(code){
 
       <div class="tab-pane" id="biz-t2">
         <div class="acquire-bar">
-          <div style="display:flex;align-items:center;gap:10px;color:#4e5969;font-size:13px;">
-            <span style="font-size:18px;">⚙️</span>
-            <span>系统将自动拉取加工 SQL 脚本(<b style="color:#1d2129;">${b.sql_voucher||b.code+'_voucher'}</b>),按合并规则将<b style="color:#1d2129;">省内源</b>与<b style="color:#1d2129;">集团侧 Excel</b>合并,加工账期 <b style="color:#1d2129;">${b.period}</b> 的数据</span>
+          <div style="display:flex;align-items:center;gap:10px;color:var(--ink-2);font-size:13px;">
+            <span>账期 <b>${b.period}</b></span>
+            <span>加工脚本 <span class="mono">${b.sql_voucher||b.code+'_voucher'}</span></span>
           </div>
-          <div class="right"><button class="btn primary" onclick="doCompose()">⚙ 开始数据加工</button></div>
+          <div class="right"><button class="btn primary" onclick="doCompose()">开始加工</button></div>
         </div>
         ${b.excel_required ? renderMergeBox(b) : ''}
         <div class="summary" id="sumBox"></div>
         <div class="filter-bar">
-          <div class="field"><span class="lbl">BATCHID</span><input class="ipt" placeholder="${b.code.toUpperCase()+b.period+code.toUpperCase().slice(-3)+'00'}" /></div>
-          <div class="field"><span class="lbl">借贷</span><select class="sel"><option>全部</option><option>贷 H</option><option>借 S</option></select></div>
+          <div class="field"><span class="lbl">BATCHID</span><input class="ipt" id="voucherBatch" placeholder="批次号" oninput="renderT2()" /></div>
+          <div class="field"><span class="lbl">借贷</span><select class="sel" id="voucherSide" onchange="renderT2()"><option value="">全部</option><option value="H">贷 H</option><option value="S">借 S</option></select></div>
           <div class="grow"></div>
-          <button class="btn" onclick="toast('已导出 SAP 报文','success')">📥 导出</button>
-          <button class="btn" onclick="renderT2()">🔄 刷新</button>
+          <button class="btn accent" onclick="openVoucherAudit()">批量审核 <span class="count" id="voucherPending">0</span></button>
+          <button class="btn" onclick="exportVouchers()" title="导出当前业务账期的全部凭证">导出</button>
+          <button class="btn" onclick="openVoucherUpload()">上传</button>
+          <button class="btn" onclick="renderT2()">刷新</button>
         </div>
+        <div id="voucherUploadInfo" class="upload-info"></div>
         <div class="tbl"><table>
           <thead><tr>
             <th style="width:30px;"></th><th>BATCHID</th><th>SUBID</th><th>REDID</th><th>BUKRS</th>
@@ -871,10 +1146,10 @@ function renderBiz(code){
         <div class="acquire-bar">
           <div class="field"><span class="lbl">扫描目录</span><input class="ipt" value="/data/program/src/zyg/file" style="min-width:280px;" /></div>
           <div class="right">
-            <button class="btn primary" onclick="addEda();toast('已生成 SAP 报文文件','success')">生成文件</button>
+            <button class="btn primary" onclick="addEda()">生成文件</button>
             <button class="btn" onclick="toast('扫描完成','success')">重新扫描</button>
             <button class="btn" onclick="toast('已发起采集请求','success')">请求采集</button>
-            <button class="btn" onclick="renderT3()">🔄 刷新</button>
+            <button class="btn" onclick="renderT3()">刷新</button>
           </div>
         </div>
         <div class="sub-nav">
@@ -886,23 +1161,23 @@ function renderBiz(code){
           <div class="tbl"><table>
             <thead><tr><th style="width:40px;">#</th><th>批次号</th><th>文件名</th><th>生成时间</th><th>凭证行数</th><th>文件大小</th><th style="width:100px;">操作</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td class="mono">A026${b.period}000020009</td><td class="mono">A026_${b.period}_000020009_20260916120000.DAT</td><td>2026-09-16 12:00:00</td><td class="num">4</td><td class="num">3.2 KB</td><td class="op"><button class="btn sm link">查看</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td></tr>
-              <tr><td>2</td><td class="mono">B026${b.period}000020009</td><td class="mono">B026_${b.period}_000020009_20260916120000.DAT</td><td>2026-09-16 12:00:00</td><td class="num">4</td><td class="num">3.1 KB</td><td class="op"><button class="btn sm link">查看</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td></tr>
+              <tr><td>1</td><td class="mono">A026${b.period}000020009</td><td class="mono">A026_${b.period}_000020009_20260916120000.DAT</td><td>2026-09-16 12:00:00</td><td class="num">4</td><td class="num">3.2 KB</td><td class="op"><button class="btn sm link">查看</button><button class="btn sm link" style="color:var(--danger);">删除</button></td></tr>
+              <tr><td>2</td><td class="mono">B026${b.period}000020009</td><td class="mono">B026_${b.period}_000020009_20260916120000.DAT</td><td>2026-09-16 12:00:00</td><td class="num">4</td><td class="num">3.1 KB</td><td class="op"><button class="btn sm link">查看</button><button class="btn sm link" style="color:var(--danger);">删除</button></td></tr>
             </tbody>
           </table></div>
         </div>
-        <div class="sub-pane" id="s2"><div class="empty"><div class="ic">📂</div>当前目录下无可上传文件</div></div>
+        <div class="sub-pane" id="s2"><div class="empty">当前目录下无可上传文件</div></div>
         <div class="sub-pane active" id="s3">
           <div class="filter-bar">
-            <div class="field"><span class="lbl">关键字</span><input class="ipt" placeholder="消息id / 文件名" id="kw3" /></div>
-            <div class="field"><span class="lbl">采集状态</span><select class="sel" id="fltSt"><option>全部</option><option>通知失败</option><option>已采集</option></select></div>
+            <div class="field"><span class="lbl">关键字</span><input class="ipt" placeholder="消息id / 文件名" id="kw3" oninput="renderT3()" /></div>
+            <div class="field"><span class="lbl">采集状态</span><select class="sel" id="fltSt" onchange="renderT3()"><option>全部</option><option>未采集</option><option>通知失败</option><option>已采集</option></select></div>
             <div class="grow"></div>
-            <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
+            <button class="btn" onclick="toast('已导出','success')">导出</button>
           </div>
           <div class="tbl"><table>
             <thead><tr>
               <th>消息id</th><th>文件名</th><th>批次号</th><th>上传时间</th>
-              <th>采集状态</th><th>解析1</th><th>解析2</th><th>入库效验</th>
+              <th>采集状态</th><th>解析1</th><th>解析2</th><th>入库效验</th><th>过账效验</th>
               <th style="width:90px;">操作</th>
             </tr></thead>
             <tbody id="t3Body"></tbody>
@@ -915,17 +1190,14 @@ function renderBiz(code){
   renderT2();
   renderT3();
   if(BIZ[code].excel_required) renderExcel();
+  updateBusinessAccess();
 }
 
 function renderExcelUpload(b){
   return `
-    <div style="margin-bottom:14px;padding:14px 18px;background:#fff7e8;border:1px solid #ffe4ba;border-radius:8px;display:flex;align-items:center;gap:12px;">
-      <div style="font-size:24px;">📊</div>
-      <div style="flex:1;">
-        <div style="font-size:13px;color:#1d2129;font-weight:500;">⚠ 本业务为 B 类(双源取数型),需先上传集团侧 Excel 文件</div>
-        <div style="font-size:12px;color:#86909c;margin-top:2px;">数据源:${b.source}</div>
-      </div>
-      <button class="btn warn" onclick="simulateUpload()">📤 上传合并源(集团侧)</button>
+    <div class="source-notice">
+      <span>请上传 ${b.period} 账期集团侧 Excel，审核后参与合并。</span>
+      <button class="btn" onclick="simulateUpload()">上传集团数据</button>
     </div>
   `;
 }
@@ -992,10 +1264,11 @@ function renderExcel(){
 }
 
 function simulateUpload(){
+  return writeBusiness(()=>{
   const b=BIZ[curBiz];
   if(!b.excel_files)return;
   const now=new Date();
-  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'2')}-${String(now.getDate()).padStart(2,'2')} ${String(now.getHours()).padStart(2,'2')}:${String(now.getMinutes()).padStart(2,'2')}:${String(now.getSeconds()).padStart(2,'2')}`;
+  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
   const fname=`集团_${b.name}_${b.period}_拉萨分公司_${ts.replace(/[-: ]/g,'')}.xlsx`;
   b.excel_files.unshift({name:fname,uploader:'财务部/演示用户',upload_time:ts,rows:b.excel_data.length,size:(1+Math.random()).toFixed(1)+' MB',state:'解析成功',period:b.period});
   // 模拟几条新解析数据
@@ -1013,6 +1286,7 @@ function simulateUpload(){
   toast(`已上传 ${fname},解析 ${b.excel_data.length} 条数据`,'success');
   // 重新渲染整个 biz 页面以更新列表
   renderBiz(curBiz);
+  });
 }
 
 function renderMergeBox(b){
@@ -1023,51 +1297,201 @@ function renderMergeBox(b){
   const excelSum=excelSumFen/100;
   const finalSum=finalSumFen/100;
   return `
-    <div style="margin-bottom:18px;background:#fff;border:1px solid #ebedf0;border-radius:8px;padding:16px 20px;box-shadow:0 2px 6px rgba(31,35,41,.04);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <div style="font-size:14px;color:#1d2129;font-weight:600;">📊 双源数据合并 — 账期 ${b.period}</div>
-        <div style="font-size:12px;color:#86909c;">合并规则:<b style="color:#1d2129;">以集团侧 Excel 源为准</b>(财务对账后修正) · 冲突时优先 Excel</div>
+    <div class="merge-box">
+      <div class="merge-head">
+        <h3>双源数据合并</h3>
+        <p>账期 ${b.period} · 以集团侧 Excel 数据为准</p>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
-        <div style="border:1px solid #e5e6eb;border-radius:6px;padding:14px;background:#fafbfc;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:#165dff;"></div>
-            <div style="font-size:13px;font-weight:500;">① 省内源(数据门户自动)</div>
-          </div>
-          <div style="font-size:12px;color:#86909c;margin-bottom:6px;">数据源:ads_db</div>
-          <div style="font-size:12px;color:#86909c;margin-bottom:10px;">条数: <b style="color:#1d2129;">${b.t1.length}</b></div>
-          <div style="font-size:20px;color:#1d2129;font-weight:600;">${fmt(t1Sum)} <span style="font-size:12px;color:#86909c;font-weight:400;">元</span></div>
-          <div style="font-size:11px;color:#86909c;margin-top:4px;">(${fmt(t1SumFen,0)} 分)</div>
+      <div class="merge-grid">
+        <div class="merge-cell">
+          <h4>省内源</h4>
+          <p>数据门户 · ${b.t1.length} 条</p>
+          <div class="amount">${fmt(t1Sum)}<small>元</small></div>
         </div>
-        <div style="border:1px solid #b7e8b7;border-radius:6px;padding:14px;background:#e8f8e8;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:#00b42a;"></div>
-            <div style="font-size:13px;font-weight:500;">② 集团侧(Excel上传)</div>
-          </div>
-          <div style="font-size:12px;color:#86909c;margin-bottom:6px;">来源:财务手工上传</div>
-          <div style="font-size:12px;color:#86909c;margin-bottom:10px;">条数: <b style="color:#1d2129;">${b.excel_data.length}</b></div>
-          <div style="font-size:20px;color:#1d2129;font-weight:600;">${fmt(excelSum)} <span style="font-size:12px;color:#86909c;font-weight:400;">元</span></div>
-          <div style="font-size:11px;color:#86909c;margin-top:4px;">(${fmt(excelSumFen,0)} 分)</div>
+        <div class="merge-cell">
+          <h4>集团侧</h4>
+          <p>Excel 上传 · ${b.excel_data.length} 条</p>
+          <div class="amount">${fmt(excelSum)}<small>元</small></div>
         </div>
-        <div style="border:1px solid #7c3aed;border-radius:6px;padding:14px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:#7c3aed;"></div>
-            <div style="font-size:13px;font-weight:500;color:#7c3aed;">③ 合并后(凭证源)</div>
-          </div>
-          <div style="font-size:12px;color:#86909c;margin-bottom:6px;">规则:<b style="color:#1d2129;">Excel 源为准</b></div>
-          <div style="font-size:12px;color:#86909c;margin-bottom:10px;">条数: <b style="color:#1d2129;">${b.excel_data.length}</b></div>
-          <div style="font-size:20px;color:#7c3aed;font-weight:600;">${fmt(finalSum)} <span style="font-size:12px;color:#86909c;font-weight:400;">元</span></div>
-          <div style="font-size:11px;color:#86909c;margin-top:4px;">(${fmt(finalSumFen,0)} 分)</div>
+        <div class="merge-cell result">
+          <h4>凭证源</h4>
+          <p>合并结果 · ${b.excel_data.length} 条</p>
+          <div class="amount">${fmt(finalSum)}<small>元</small></div>
         </div>
       </div>
     </div>
   `;
 }
 
+const VOUCHER_COLUMNS=[
+  ['batch','BATCHID'],['sub','SUBID'],['red','REDID'],['buk','BUKRS'],
+  ['gj','GJAHR'],['mo','MONAT'],['txt','BKTXT'],['hkont','HKONT'],['koart','KOART'],
+  ['shkzg','SHKZG'],['waers','WAERS'],['amt','BWRBTR(分)'],['prctr','PRCTR'],['budat','BUDAT']
+];
+const VOUCHER_HEADER=['业务编码','账期',...VOUCHER_COLUMNS.map(([,label])=>label)];
+function voucherRows(b){
+  const batch=(document.getElementById('voucherBatch')?.value||'').trim().toLowerCase();
+  const side=document.getElementById('voucherSide')?.value||'';
+  return b.v1.map((row,index)=>({row,index})).filter(({row})=>(!batch||row.batch.toLowerCase().includes(batch))&&(!side||row.shkzg===side));
+}
+function voucherBalance(rows){
+  const groups=new Map();
+  for(const r of rows){
+    const key=[r.batch,r.sub,r.buk,r.waers].join('/');
+    const group=groups.get(key)||{debit:0,credit:0};
+    group[r.shkzg==='S'?'debit':'credit']+=Math.round(r.amt*100);
+    if(!Number.isSafeInteger(group.debit)||!Number.isSafeInteger(group.credit))throw new Error('凭证合计金额超出支持范围');
+    groups.set(key,group);
+  }
+  return [...groups].filter(([,g])=>g.debit!==g.credit).map(([key])=>key);
+}
+function csvCell(value){
+  let text=String(value);
+  if(typeof value==='string'&&/^(?:[=+\-@\t\r']|0\d)/.test(text))text="'"+text;
+  return '"'+text.replace(/"/g,'""')+'"';
+}
+function voucherCSV(b){
+  return '\uFEFF'+[VOUCHER_HEADER,...b.v1.map(r=>[b.code,b.period,...VOUCHER_COLUMNS.map(([key])=>key==='amt'?Math.round(r.amt*100):r[key])])]
+    .map(row=>row.map(csvCell).join(',')).join('\r\n');
+}
+function exportVouchers(){
+  if(!requireBusinessOwner())return;
+  hydrateBusiness(readWorkflow());
+  const b=BIZ[curBiz];
+  const url=URL.createObjectURL(new Blob([voucherCSV(b)],{type:'text/csv;charset=utf-8'}));
+  const link=document.createElement('a');
+  link.href=url;link.download=`${b.name}_${b.period}_加工凭证.csv`;
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,'');
+  const rows=[];let row=[],field='',quoted=false,closed=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){
+      if(ch==='"'){
+        if(text[i+1]==='"'){field+='"';i++}else{quoted=false;closed=true}
+      }else field+=ch;
+    }else if(ch===','||ch==='\n'||ch==='\r'){
+      row.push(field);field='';closed=false;
+      if(ch!==','){rows.push(row);row=[];if(ch==='\r'&&text[i+1]==='\n')i++}
+    }else if(ch==='"'&&!field&&!closed)quoted=true;
+    else if(closed||ch==='"')throw new Error('CSV 引号格式错误，请从导出文件另存为 CSV UTF-8');
+    else field+=ch;
+  }
+  if(quoted)throw new Error('CSV 引号未闭合');
+  if(field||row.length||closed){row.push(field);rows.push(row)}
+  return rows.filter(row=>row.some(value=>value.trim()));
+}
+function parseVoucherCSV(text,b){
+  const [header,...rows]=parseCSV(text);
+  if(!header||header.join('\0')!==VOUCHER_HEADER.join('\0'))throw new Error('表头不匹配，请使用本页导出的 CSV 文件');
+  if(!rows.length||rows.length>10000)throw new Error('文件应包含 1 至 10,000 行凭证数据');
+  const seen=new Set();
+  const result=rows.map((cells,i)=>{
+    const fail=message=>{throw new Error(`第 ${i+2} 行：${message}`)};
+    if(cells.length!==VOUCHER_HEADER.length)fail('列数不正确');
+    const values=cells.map(value=>value.replace(/^'/,'').trim());
+    if(values.some(value=>!value||value.length>200||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)))fail('存在空字段、超长字段或无效字符');
+    if(values[0].padStart(9,'0')!==b.code||values[1]!==b.period)fail('业务编码或账期与当前页面不一致');
+    const r=Object.fromEntries(VOUCHER_COLUMNS.map(([key],index)=>[key,values[index+2]]));
+    if(!/^\d+$/.test(r.amt)||!Number.isSafeInteger(Number(r.amt))||Number(r.amt)>9000000000000)fail('金额必须为有效的非负整数，单位为分');
+    r.amt=Number(r.amt)/100;
+    r.mo=r.mo.padStart(2,'0');r.sub=r.sub.padStart(3,'0');
+    if(r.gj+r.mo!==b.period)fail('凭证年度、月份与账期不一致');
+    if(!['S','H'].includes(r.shkzg))fail('借贷标识必须为 S 或 H');
+    if(!['S','D','K','A','M'].includes(r.koart))fail('科目类型无效');
+    if(!/^[A-Z]{3}$/.test(r.waers))fail('币种须为三位大写字母');
+    for(const key of ['batch','sub','red','buk','hkont','prctr'])if(!/^[A-Za-z0-9_.-]+$/.test(r[key]))fail(`${key} 编码包含无效字符`);
+    if(!/^\d{8}$/.test(r.budat)||r.budat.slice(0,6)!==b.period)fail('记账日期应为当前账期的 YYYYMMDD');
+    const date=new Date(`${r.budat.slice(0,4)}-${r.budat.slice(4,6)}-${r.budat.slice(6,8)}T00:00:00Z`);
+    if(Number.isNaN(date.getTime())||date.toISOString().slice(0,10).replace(/-/g,'')!==r.budat)fail('记账日期无效');
+    const id=[r.batch,r.sub,r.red].join('/');
+    if(seen.has(id))fail('BATCHID、SUBID、REDID 重复');
+    seen.add(id);
+    return {...r,st:'待审核'};
+  });
+  const unbalanced=voucherBalance(result);
+  if(unbalanced.length)throw new Error(`凭证借贷不平衡：${unbalanced[0]}。请按批次、子凭证、公司及币种核对。`);
+  return result;
+}
+let uploadContext=null;
+let pendingImport=null;
+let uploadSequence=0;
+function openVoucherUpload(){
+  if(!requireBusinessOwner())return;
+  uploadContext={biz:curBiz,user:currentUser,token:readWorkflow().token,source:JSON.stringify(BIZ[curBiz].v1)};
+  pendingImport=null;uploadSequence++;
+  document.getElementById('voucherFile').value='';
+  document.getElementById('voucherUploadError').textContent='';
+  document.getElementById('voucherPreview').innerHTML='';
+  document.getElementById('confirmVoucherUpload').disabled=true;
+  document.getElementById('dlgVoucherUpload').classList.add('show');
+}
+async function previewVoucherFile(file){
+  if(!requireBusinessOwner())return;
+  const sequence=++uploadSequence;
+  pendingImport=null;
+  document.getElementById('confirmVoucherUpload').disabled=true;
+  document.getElementById('voucherUploadError').textContent='';
+  document.getElementById('voucherPreview').innerHTML='';
+  if(!file||!uploadContext)return;
+  const context=uploadContext;
+  try{
+    if(!/\.csv$/i.test(file.name)||file.size>5*1024*1024)throw new Error('请选择 5 MB 以内的 CSV 文件');
+    const text=new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer());
+    if(sequence!==uploadSequence||context!==uploadContext||context.user!==currentUser||!ownsBusiness())return;
+    const rows=parseVoucherCSV(text,BIZ[context.biz]);
+    pendingImport={...context,rows,fileName:file.name};
+    document.getElementById('voucherPreview').innerHTML=`
+      <p class="import-note">校验通过 · ${rows.length} 行 · 借贷平衡。确认后替换当前业务账期的全部凭证，所有记录重新审核。</p>
+      <div class="tbl"><table><thead><tr><th>批次</th><th>科目</th><th>摘要</th><th>借贷</th><th class="num">金额（分）</th></tr></thead>
+      <tbody>${rows.slice(0,10).map(r=>`<tr><td>${escapeHtml(r.batch)}</td><td>${escapeHtml(r.hkont)}</td><td>${escapeHtml(r.txt)}</td><td>${r.shkzg==='S'?'借':'贷'}</td><td class="num">${fmt(Math.round(r.amt*100),0)}</td></tr>`).join('')}</tbody></table></div>
+      ${rows.length>10?'<p class="import-note">仅预览前 10 行。</p>':''}`;
+    document.getElementById('confirmVoucherUpload').disabled=false;
+  }catch(error){
+    if(sequence===uploadSequence)document.getElementById('voucherUploadError').textContent=error instanceof TypeError?'文件编码无效，请另存为 CSV UTF-8':error.message;
+  }
+}
+function confirmVoucherUpload(){
+  return writeBusiness(()=>{
+  if(!pendingImport||pendingImport.biz!==curBiz||pendingImport.user!==currentUser||pendingImport.token!==readWorkflow().token)return;
+  const b=BIZ[curBiz];
+  if(JSON.stringify(b.v1)!==pendingImport.source)return toast('凭证已发生变化，请重新上传','error');
+  b.v1=pendingImport.rows;
+  b.voucherUpload={name:pendingImport.fileName,time:new Date().toLocaleString('sv-SE'),rows:b.v1.length,user:currentUser};
+  pendingImport=null;uploadContext=null;
+  for(const key of Object.keys(expanded))delete expanded[key];
+  document.getElementById('voucherBatch').value='';
+  document.getElementById('voucherSide').value='';
+  closeDlg('dlgVoucherUpload');renderT2();
+  toast('调整凭证已上传，等待批量审核','success');
+  });
+}
+function openVoucherAudit(){
+  if(!requireBusinessOwner())return;
+  const b=BIZ[curBiz];
+  const selected=voucherRows(b).filter(({row})=>row.st==='待审核');
+  if(!selected.length)return toast('当前范围没有待审核凭证');
+  batchTarget={biz:curBiz,user:currentUser,token:readWorkflow().token,tab:'T2',indices:selected.map(({index})=>index),source:JSON.stringify(b.v1)};
+  document.getElementById('dlgBatchBody').innerHTML=`
+    <div class="summary">
+      <div class="cell"><div class="lbl">账期</div><div class="val">${b.period}</div></div>
+      <div class="cell"><div class="lbl">待审核行数</div><div class="val">${selected.length}</div></div>
+      <div class="cell"><div class="lbl">借方金额（分）</div><div class="val">${fmt(selected.reduce((s,{row})=>s+(row.shkzg==='S'?Math.round(row.amt*100):0),0),0)}</div></div>
+      <div class="cell"><div class="lbl">贷方金额（分）</div><div class="val">${fmt(selected.reduce((s,{row})=>s+(row.shkzg==='H'?Math.round(row.amt*100):0),0),0)}</div></div>
+    </div><p class="import-note">仅审核当前筛选范围内的待审核凭证。</p>`;
+  document.getElementById('dlgBatch').classList.add('show');
+}
+
 function renderT2(){
   const tb=document.getElementById('t2Body');
   if(!tb)return;
   const b=BIZ[curBiz];
+  const visible=voucherRows(b);
+  document.getElementById('voucherPending').textContent=visible.filter(({row})=>row.st==='待审核').length;
+  document.getElementById('voucherUploadInfo').textContent=b.voucherUpload?`最近上传：${b.voucherUpload.name} · ${b.voucherUpload.rows} 行 · ${b.voucherUpload.user} · ${b.voucherUpload.time}`:'';
   const totalH=b.v1.filter(r=>r.shkzg==='H').reduce((s,r)=>s+r.amt,0);
   const totalS=b.v1.filter(r=>r.shkzg==='S').reduce((s,r)=>s+r.amt,0);
   const batchSet=new Set(b.v1.map(r=>r.batch));
@@ -1076,11 +1500,13 @@ function renderT2(){
     <div class="cell"><div class="lbl">凭证行数</div><div class="val">${b.v1.length}</div></div>
     <div class="cell"><div class="lbl">贷方合计</div><div class="val">${fmt(totalH*100)} 分</div></div>
     <div class="cell"><div class="lbl">借方合计</div><div class="val">${fmt(totalS*100)} 分</div></div>
-    <div class="cell ok"><div class="lbl">借贷平衡</div><div class="val">${Math.abs(totalH-totalS)<0.01?'✓ 平衡':'✗ 不平'}</div></div>
+    <div class="cell ${voucherBalance(b.v1).length?'warn':'ok'}"><div class="lbl">借贷平衡</div><div class="val">${voucherBalance(b.v1).length?'不平':'平衡'}</div></div>
   `;
-  tb.innerHTML = b.v1.map((r,i)=>`
+  tb.innerHTML = visible.map(({row,index:i})=>{
+    const r=Object.fromEntries(Object.entries(row).map(([key,value])=>[key,typeof value==='string'?escapeHtml(value):value]));
+    return `
     <tr data-idx="${i}">
-      <td class="center" style="cursor:pointer;color:#165dff;" onclick="toggleVoucher(${i})">${expanded[i]?'▼':'▶'}</td>
+      <td class="center" style="cursor:pointer;color:var(--pri);" onclick="toggleVoucher(${i})">${expanded[i]?'▼':'▶'}</td>
       <td><span class="mono">${r.batch}</span></td>
       <td>${r.sub}</td>
       <td class="center">${r.red}</td>
@@ -1098,8 +1524,8 @@ function renderT2(){
       <td>${st(r.st,r.st==='已通过'?'ok':(r.st==='已驳回'?'fail':'warn'))}</td>
     </tr>
     <tr class="v-det" id="vd${i}" style="display:${expanded[i]?'table-row':'none'};">
-      <td colspan="17"><div class="v-det-inner">
-        <div class="ttl">📄 完整 45 字段 SAP 凭证行</div>
+      <td colspan="16"><div class="v-det-inner">
+        <div class="ttl">完整 45 字段 SAP 凭证行</div>
         <div class="kv-grid">
           <div class="kv"><span class="k">BATCHID:</span><span class="v">${r.batch}</span></div>
           <div class="kv"><span class="k">BUKRS:</span><span class="v">${r.buk}</span></div>
@@ -1109,12 +1535,13 @@ function renderT2(){
           <div class="kv"><span class="k">BWRBTR:</span><span class="v">${fmt(r.amt*100)}</span></div>
           <div class="kv"><span class="k">PRCTR:</span><span class="v">${r.prctr}</span></div>
           <div class="kv"><span class="k">BUDAT:</span><span class="v">${r.budat}</span></div>
-          <div class="kv"><span class="k">USNAM:</span><span class="v">W8406768@XZ</span></div>
+          <div class="kv"><span class="k">USNAM:</span><span class="v">${escapeHtml(b.voucherUpload?.user||'W8406768@XZ')}</span></div>
           <div class="kv"><span class="k">SSGTXT:</span><span class="v">转拉萨分公司${r.gj}年${r.mo}月${r.txt}</span></div>
         </div>
       </div></td>
     </tr>
-  `).join('');
+  `}).join('')||'<tr><td colspan="16" class="empty">无匹配记录</td></tr>';
+  updateBusinessAccess();
 }
 
 function toggleVoucher(i){
@@ -1127,10 +1554,10 @@ function renderT3(){
   if(!tb)return;
   const kw=(document.getElementById('kw3')?.value||'').toLowerCase();
   const st=(document.getElementById('fltSt')?.value||'全部');
-  let arr=EDA_DATA.slice();
+  let arr=BIZ[curBiz].eda.slice();
   if(kw)arr=arr.filter(r=>r.mid.toLowerCase().includes(kw)||r.file.toLowerCase().includes(kw));
   if(st!=='全部')arr=arr.filter(r=>r.c===st);
-  if(!arr.length){tb.innerHTML=`<tr><td colspan="9" class="empty"><div class="ic">📭</div>无匹配记录</td></tr>`;return;}
+  if(!arr.length){tb.innerHTML=`<tr><td colspan="10" class="empty">无匹配记录</td></tr>`;return;}
   tb.innerHTML=arr.map(r=>{
     const fail=r.c==='通知失败';
     return `<tr class="${fail?'fail':''}">
@@ -1139,45 +1566,72 @@ function renderT3(){
       <td>${r.batch==='-'?'-':`<span class="mono ellipsis" style="max-width:140px;">${r.batch}</span>`}</td>
       <td>${r.ts}</td>
       <td>${stEl(r.c,r.c==='通知失败'?'fail':(r.c==='已采集'?'ok':'gray'))}</td>
-      <td>${stEl(r.p1,'warn')}</td>
-      <td>${stEl(r.p2,'warn')}</td>
-      <td>${stEl(r.v1,'warn')}</td>
-      <td class="op"><button class="btn sm link" onclick="showPosting()">查看过账</button></td>
+      <td>${stEl(r.p1,statusClass(r.p1))}</td>
+      <td>${stEl(r.p2,statusClass(r.p2))}</td>
+      <td>${stEl(r.v1,statusClass(r.v1))}</td>
+      <td>${stEl(r.v2,statusClass(r.v2))}</td>
+      <td class="op"><button class="btn sm link" data-read onclick="showPosting(${BIZ[curBiz].eda.indexOf(r)})">详细日志</button></td>
     </tr>`;
   }).join('');
+  updateBusinessAccess();
 }
 
 function stEl(t,k){return `<span class="st ${k}">${t}</span>`}
 
-function showPosting(){
-  const bs=[{no:'B0262025090000098',vst:'-',ctime:'2026-03-11 14:55:41',result:'-'},{no:'B0262025090000097',vst:'-',ctime:'2026-03-11 14:55:41',result:'-'}];
-  document.getElementById('dlgPostCnt').textContent=bs.length;
-  document.getElementById('dlgPostBody').innerHTML=bs.map((b,i)=>`
-    <div class="b-block">
-      <h4><span class="idx">#${i+1}</span>批次号 ${b.no}</h4>
-      <div class="grid">
-        <div class="gf"><div class="lbl">批次号</div><div class="val">${b.no}</div></div>
-        <div class="gf"><div class="lbl">过账校验状态</div><div class="val">${stEl(b.vst,'gray')}</div></div>
-        <div class="gf"><div class="lbl">创建时间</div><div class="val">${b.ctime}</div></div>
-      </div>
-      <div class="res"><b style="color:#86909c;">过账结果:</b><br>${b.result||'-'}</div>
-    </div>
-  `).join('');
+let postingTarget=null;
+function showPosting(index){
+  const r=BIZ[curBiz].eda[index];
+  if(!r)return;
+  postingTarget={biz:curBiz,mid:r.mid};
+  const stages=[['上传文件','成功',r.ts,'文件已上传'],['采集通知',r.c,'-',r.c==='通知失败'?'采集通知失败，暂无后续回执':'采集状态：'+r.c],
+    ['解析1',r.p1,'-','解析回执'],['解析2',r.p2,'-','解析回执'],
+    ['入库效验',r.v1,'-','入库校验回执'],['过账效验',r.v2,r.retryAt||'-',r.retryAt?'已提交重新过账请求（演示）':'过账校验回执']];
+  document.getElementById('dlgPostCnt').textContent=stages.length;
+  document.getElementById('dlgPostBody').innerHTML=`
+    <div class="b-block"><div class="grid">
+      <div class="gf"><div class="lbl">消息 ID</div><div class="val">${escapeHtml(r.mid)}</div></div>
+      <div class="gf"><div class="lbl">批次号</div><div class="val">${escapeHtml(r.batch)}</div></div>
+    </div><div class="res">${escapeHtml(r.file)}</div></div>
+    <div class="tbl"><table><thead><tr><th>环节</th><th>状态</th><th>时间</th><th>日志</th></tr></thead><tbody>
+    ${stages.map(([name,state,time,detail])=>`<tr><td>${name}</td><td>${stEl(state,statusClass(state))}</td><td>${escapeHtml(time)}</td><td>${escapeHtml((state==='-'||state==='待校验')&&!(name==='过账效验'&&r.retryAt)?'暂无回执':detail)}</td></tr>`).join('')}
+    </tbody></table></div>`;
+  updateBusinessAccess();
   document.getElementById('dlgPost').classList.add('show');
 }
 
-function addEda(){
-  const now=new Date();
-  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  EDA_DATA.unshift({mid:`EDA@891;test;00001;01`,file:`DAPM_MSS_INCOME.${BIZ[curBiz].period}.202509.02.001.001.854.DAT`,path:'/data/program/src/zyg/file',batch:`A026${BIZ[curBiz].period}000020009`,ts,c:'已采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'});
+function retryPosting(){
+  return writeBusiness(()=>{
+  if(!postingTarget||postingTarget.biz!==curBiz)return;
+  const r=BIZ[curBiz].eda.find(row=>row.mid===postingTarget.mid);
+  if(!r||!['已通过','校验通过'].includes(r.v1))return toast('入库校验通过后才可重新过账','error');
+  r.v2='待校验';
+  r.retryAt=new Date().toLocaleString('sv-SE');
   renderT3();
+  showPosting(BIZ[curBiz].eda.indexOf(r));
+  toast('重新过账请求已提交（演示）','success');
+  });
 }
 
-function doAcquire(){toast(`取数完成,临时表 temp_${curBiz}_yj_${BIZ[curBiz].period}`,'success');renderT1()}
-function doCompose(){setTimeout(()=>{renderT2();toast('已生成凭证','success')},300)}
+function addEda(){
+  return writeBusiness(()=>{
+  if(!BIZ[curBiz].v1.length||BIZ[curBiz].v1.some(row=>row.st!=='已通过')||voucherBalance(BIZ[curBiz].v1).length)
+    return toast('请先完成全部凭证审核并确认借贷平衡','error');
+  const now=new Date();
+  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  BIZ[curBiz].eda.unshift({mid:`EDA@891;${Date.now()};${BIZ[curBiz].eda.length};01`,file:`DAPM_MSS_INCOME.${BIZ[curBiz].period}.${BIZ[curBiz].code}.DAT`,path:'/data/program/src/zyg/file',batch:BIZ[curBiz].v1[0]?.batch||'-',ts,c:'已采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'待校验'});
+  renderT3();
+  toast('已生成 SAP 报文文件（演示）','success');
+  });
+}
+
+function doAcquire(){return writeBusiness(()=>{toast(`取数完成,临时表 temp_${curBiz}_yj_${BIZ[curBiz].period}`,'success');renderT1()})}
+function doCompose(){return writeBusiness(()=>{
+  BIZ[curBiz].v1.forEach(row=>row.st='待审核');
+  renderT2();toast('凭证加工完成，请审核（演示）','success');
+})}
 
 function openAudit(tab,i){
-  auditTarget={tab,idx:i};
+  auditTarget={tab,idx:i,biz:curBiz};
   const b=BIZ[curBiz];
   let r;
   if(tab==='T1')r=b.t1[i];
@@ -1188,7 +1642,7 @@ function openAudit(tab,i){
     <div class="cell"><div class="lbl">本地网 local_id</div><div class="val">${r.local_id}</div></div>
     <div class="cell"><div class="lbl">营业区 area_id</div><div class="val">${r.area_id}</div></div>
     <div class="cell"><div class="lbl">CDMA cdma_flag</div><div class="val">${r.cdma_flag}</div></div>
-    <div class="cell"><div class="lbl">金额 fee</div><div class="val">${fmt(r.fee/100,2)} 元 <span style="color:#86909c;font-size:11px;">(${fmt(r.fee,0)} 分)</span></div></div>
+    <div class="cell"><div class="lbl">金额 fee</div><div class="val">${fmt(r.fee/100,2)} 元 <span style="color:var(--ink-3);font-size:11px;">(${fmt(r.fee,0)} 分)</span></div></div>
     <div class="cell"><div class="lbl">渠道 qd_name</div><div class="val">${r.qd_name}</div></div>
     <div class="cell"><div class="lbl">费用类型 fee_type</div><div class="val">${r.fee_type}</div></div>
   ` : tab==='EXCEL' ? `
@@ -1210,7 +1664,8 @@ function openAudit(tab,i){
 }
 
 function auditConfirm(pass){
-  if(!auditTarget)return;
+  return writeBusiness(()=>{
+  if(!auditTarget||auditTarget.biz!==curBiz)return;
   const b=BIZ[curBiz];
   const tab=auditTarget.tab;
   const arr=tab==='T1'?b.t1:(tab==='EXCEL'?b.excel_data:b.v1);
@@ -1221,11 +1676,15 @@ function auditConfirm(pass){
   else if(tab==='EXCEL')renderExcel();
   else renderT2();
   toast(pass?'已审核通过':'已驳回',pass?'success':'error');
+  });
 }
 
 function openBatchExcelAudit(){
+  if(!requireBusinessOwner())return;
   const b=BIZ[curBiz];
   const pending=b.excel_data.filter(r=>r.st==='待审核');
+  if(!pending.length)return toast('没有待审核的集团数据');
+  batchTarget={biz:curBiz,user:currentUser,token:readWorkflow().token,tab:'EXCEL',indices:b.excel_data.flatMap((r,i)=>r.st==='待审核'?[i]:[]),source:JSON.stringify(b.excel_data)};
   const totalAmt=pending.reduce((s,r)=>s+r.fee_qf,0);
   document.getElementById('dlgBatchBody').innerHTML=`
     <div class="summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
@@ -1233,48 +1692,53 @@ function openBatchExcelAudit(){
       <div class="cell"><div class="lbl">待审核条数</div><div class="val">${pending.length}</div></div>
       <div class="cell warn"><div class="lbl">待审核金额(元)</div><div class="val">${fmt(totalAmt)}</div></div>
     </div>
-    <div style="color:#4e5969;margin-bottom:8px;font-size:13px;">来源: 集团侧 Excel 文件(已解析) · 仅处理"待审核"记录</div>
-    <div style="margin-top:12px;color:#86909c;font-size:12px;">⚠ 通过后将与省内源数据按合并规则处理(进入"加工数据与凭证")</div>
+    <div style="color:var(--ink-2);margin-bottom:8px;font-size:13px;">来源: 集团侧 Excel 文件(已解析) · 仅处理"待审核"记录</div>
+    <div style="margin-top:12px;color:var(--ink-3);font-size:12px;">审核通过后，将与省内源数据合并用于凭证加工。</div>
   `;
   document.getElementById('dlgBatch').classList.add('show');
 }
 
 function openBatchAudit(){
+  if(!requireBusinessOwner())return;
   const b=BIZ[curBiz];
   const pending=b.t1.filter(r=>r.st==='待审核');
+  if(!pending.length)return toast('没有待审核的数据');
+  batchTarget={biz:curBiz,user:currentUser,token:readWorkflow().token,tab:'T1',indices:b.t1.flatMap((r,i)=>r.st==='待审核'?[i]:[]),source:JSON.stringify(b.t1)};
   const totalAmt=pending.reduce((s,r)=>s+r.fee,0);
   document.getElementById('dlgBatchBody').innerHTML=`
     <div class="summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
       <div class="cell"><div class="lbl">账期</div><div class="val">${b.period}</div></div>
       <div class="cell"><div class="lbl">待审核条数</div><div class="val">${pending.length}</div></div>
-      <div class="cell warn"><div class="lbl">待审核金额(元)</div><div class="val">${fmt(totalAmt)}</div></div>
+      <div class="cell warn"><div class="lbl">待审核金额(元)</div><div class="val">${fmt(totalAmt/100)}</div></div>
     </div>
-    <div style="color:#4e5969;margin-bottom:8px;font-size:13px;">筛选条件(只处理范围内):</div>
-    <div class="filter-bar" style="padding:0;">
-      <div class="field"><span class="lbl">本地网</span><select class="sel sm"><option>全部</option><option>891</option></select></div>
-      <div class="field"><span class="lbl">金额</span>
-        <input class="ipt sm" placeholder="最小" style="min-width:90px;"/>
-        <span style="color:#c9cdd4;">—</span>
-        <input class="ipt sm" placeholder="最大" style="min-width:90px;"/>
-      </div>
-    </div>
-    <div style="margin-top:12px;color:#86909c;font-size:12px;">⚠ 将作用于筛选范围内的所有"待审核"记录</div>
+    <p class="import-note">审核当前业务账期的全部待审核数据。</p>
   `;
   document.getElementById('dlgBatch').classList.add('show');
 }
 
 function batchConfirm(pass){
+  return writeBusiness(()=>{
+  if(!batchTarget||batchTarget.biz!==curBiz||batchTarget.user!==currentUser||batchTarget.token!==readWorkflow().token)return;
   const b=BIZ[curBiz];
+  const tab=batchTarget.tab;
+  const rows=tab==='T2'?b.v1:tab==='EXCEL'?b.excel_data:b.t1;
+  if(JSON.stringify(rows)!==batchTarget.source)return toast('数据已发生变化，请重新打开审核窗口','error');
+  if(pass&&tab==='T2'&&voucherBalance(rows).length)return toast('凭证借贷不平衡，无法通过审核','error');
   let cnt=0;
-  b.t1.forEach(r=>{if(r.st==='待审核'){r.st=pass?'已通过':'已驳回';cnt++}});
+  batchTarget.indices.forEach(i=>{const r=rows[i];if(r?.st==='待审核'){r.st=pass?'已通过':'已驳回';cnt++}});
+  batchTarget=null;
   closeDlg('dlgBatch');
-  renderT1();
+  if(tab==='T2')renderT2();
+  else if(tab==='EXCEL')renderExcel();
+  else renderT1();
   toast(pass?`已批量通过 ${cnt} 条`:`已批量驳回 ${cnt} 条`,pass?'success':'error');
+  });
 }
 
 // ====================== 数据源管理 ======================
 function renderDSM(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('数据源管理')}
     <div class="panel">
       <div class="filter-bar">
         <div class="field"><span class="lbl">编码</span><input class="ipt" placeholder="如 ads_mysql" id="dsmKc" /></div>
@@ -1282,7 +1746,7 @@ function renderDSM(){
         <div class="field"><span class="lbl">类型</span><select class="sel" id="dsmKt"><option>全部</option><option>MYSQL</option><option>POSTGRESQL</option><option>DORIS</option><option>REDIS</option></select></div>
         <div class="field"><span class="lbl">状态</span><select class="sel" id="dsmKs"><option>全部</option><option>启用</option><option>禁用</option></select></div>
         <div class="grow"></div>
-        <button class="btn" onclick="renderDSMTb()">🔄 刷新</button>
+        <button class="btn" onclick="renderDSMTb()">刷新</button>
         <button class="btn primary" onclick="openDSME()">+ 新增数据源</button>
       </div>
       <div class="tbl"><table>
@@ -1321,7 +1785,7 @@ function renderDSMTb(){
     <tr>
       <td class="center">${i+1}</td>
       <td><span class="mono">${d.code}</span></td>
-      <td><b style="color:#1d2129;">${d.name}</b></td>
+      <td><b style="color:var(--ink-1);">${d.name}</b></td>
       <td>${stEl(d.db_type,d.db_type==='MYSQL'?'info':(d.db_type==='DORIS'?'purple':(d.db_type==='REDIS'?'warn':'gray')))}</td>
       <td><span class="mono ellipsis" style="max-width:260px;" title="${d.jdbc_url}">${d.jdbc_url}</span></td>
       <td>${d.username}</td>
@@ -1393,7 +1857,7 @@ function testDSME(){
   toast('测试连接中…','success');
   setTimeout(()=>{
     const ok=(document.getElementById('dsmUser').value||'').length>0 || type==='REDIS';
-    toast(ok?'✓ 连接成功':'✗ 连接失败(请检查用户名/密码)', ok?'success':'error');
+    toast(ok?'连接成功':'连接失败(请检查用户名/密码)', ok?'success':'error');
   },600);
 }
 
@@ -1456,12 +1920,13 @@ let curSub='info';
 
 function renderSQLList(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('SQL 模板')}
     <div class="sql-layout">
       <div class="sql-list">
-        <div class="sql-list-head"><input class="ipt sql-list-search" placeholder="🔍 搜索编码 / 名称" id="sqlKw" oninput="renderSQLTb()" /></div>
+        <div class="sql-list-head"><input class="ipt sql-list-search" placeholder="搜索编码 / 名称" id="sqlKw" oninput="renderSQLTb()" /></div>
         <div class="sql-list-body" id="sqlTb"></div>
         <div style="padding:10px 16px;border-top:1px solid #f0f1f3;display:flex;justify-content:space-between;align-items:center;background:#fafbfc;">
-          <span style="font-size:12px;color:#86909c;">共 <b id="sqlTotal">0</b> 个模板</span>
+          <span style="font-size:12px;color:var(--ink-3);">共 <b id="sqlTotal">0</b> 个模板</span>
           <button class="btn sm primary" onclick="toast('已新建(演示)','success')">+ 新建</button>
         </div>
       </div>
@@ -1482,7 +1947,7 @@ function renderSQLTb(){
       <div class="mt">
         ${stEl(t.sql_type,t.sql_type==='COMPOSITE'?'purple':'info')}
         ${stEl(t.state===1?'启用':'禁用',t.state===1?'ok':'gray')}
-        <span style="font-size:11px;color:#86909c;">v${t.version}</span>
+        <span style="font-size:11px;color:var(--ink-3);">v${t.version}</span>
       </div>
     </div>
   `).join('');
@@ -1498,7 +1963,7 @@ function openSQL(id){
 function renderSQLDet(){
   const t=SQL_TPLS.find(x=>x.id===curSql);
   const el=document.getElementById('sqlDet');
-  if(!t){el.innerHTML=`<div class="empty" style="margin:auto;"><div class="ic">📋</div>请从左侧选择</div>`;return;}
+  if(!t){el.innerHTML=`<div class="empty" style="margin:auto;">请从左侧选择</div>`;return;}
   el.innerHTML=`
     <div class="sql-detail-head">
       <div>
@@ -1506,8 +1971,8 @@ function renderSQLDet(){
         <div class="cd">${t.code} · 数据源 ${t.ds_code} · v${t.version}</div>
       </div>
       <div class="right">
-        <button class="btn warn" onclick="runTest()">🧪 试跑</button>
-        <button class="btn primary" onclick="toast('已保存','success')">💾 保存</button>
+        <button class="btn warn" onclick="runTest()">试跑</button>
+        <button class="btn primary" onclick="toast('已保存','success')">保存</button>
       </div>
     </div>
     <div class="sub-nav">
@@ -1527,11 +1992,11 @@ function renderSQLDet(){
       </div>
     </div>
     <div class="sub-pane ${curSub==='sql'?'active':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 使用 <code>#{paramName}</code> 占位符</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:var(--ink-2);">使用 <code>#{paramName}</code> 占位符</div>
       <textarea class="sql-edit" style="min-height:300px;">${t.sql_text}</textarea>
     </div>
     <div class="sub-pane ${curSub==='params'?'active':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 SQL 中每个 <code>#{xxx}</code> 必须在此定义</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:var(--ink-2);">SQL 中每个 <code>#{xxx}</code> 必须在此定义</div>
       <div class="tbl" style="max-height:380px;"><table>
         <thead><tr><th style="width:40px;">#</th><th>形参名</th><th>显示名</th><th>类型</th><th>必填</th><th>UI控件</th><th>变更频度</th><th style="width:90px;">操作</th></tr></thead>
         <tbody>${t.params.map((p,i)=>`<tr>
@@ -1542,12 +2007,11 @@ function renderSQLDet(){
           <td class="center">${p.required?stEl('是','fail'):stEl('否','gray')}</td>
           <td>${stEl(p.ui,p.ui==='MONTH_PICKER'?'warn':'gray')}</td>
           <td>${stEl(p.change_freq,p.change_freq==='MONTHLY'?'warn':(p.change_freq==='NEVER'?'ok':'gray'))}</td>
-          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:var(--danger);">删除</button></td>
         </tr>`).join('')}</tbody>
       </table></div>
     </div>
     <div class="sub-pane ${curSub==='history'?'active':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 每次 UPDATE 自动产生快照</div>
       <div class="tbl" style="max-height:380px;"><table>
         <thead><tr><th>版本</th><th>操作人</th><th>操作时间</th><th style="width:160px;">操作</th></tr></thead>
         <tbody>${t.history.map((h,i)=>`<tr>
@@ -1576,7 +2040,7 @@ function runTest(){
   r.innerHTML=`<span class="ts">[${new Date().toLocaleTimeString()}]</span> 加载 SQL 模板 <span class="k">${t.code}</span> (v${t.version}) ...
 <span class="ts">[${new Date().toLocaleTimeString()}]</span> 绑定参数: <span class="k">{ period: "202608" }</span>
 <span class="ts">[${new Date().toLocaleTimeString()}]</span> 执行 sql_type=<span class="k">${t.sql_type}</span>, data_source=<span class="k">${t.ds_code}</span> ...
-<span class="ts">[${new Date().toLocaleTimeString()}]</span> <span class="ok">✓ 执行成功</span>,耗时: <span class="k">${(Math.random()*2+0.5).toFixed(2)}s</span>
+<span class="ts">[${new Date().toLocaleTimeString()}]</span> <span class="ok">执行成功</span>,耗时: <span class="k">${(Math.random()*2+0.5).toFixed(2)}s</span>
 <span class="ts">[${new Date().toLocaleTimeString()}]</span> 影响行数: <span class="k">${Math.floor(Math.random()*10+3)}</span>
 <span class="ts">[${new Date().toLocaleTimeString()}]</span> 写入 exec_log (trace_id=tr_${Date.now()})`;
   toast('试跑成功','success');
@@ -1585,6 +2049,7 @@ function runTest(){
 // ====================== SAP 字段字典 ======================
 function renderSAP(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('SAP 字段字典')}
     <div class="panel">
       <div class="filter-bar">
         <div class="field"><span class="lbl">字段编码</span><input class="ipt" placeholder="如 BATCHID" /></div>
@@ -1597,12 +2062,12 @@ function renderSAP(){
         <tbody>${SAP_FIELDS.map((f,i)=>`<tr>
           <td class="center">${i+1}</td>
           <td><span class="mono">${f.code}</span></td>
-          <td><b style="color:#1d2129;">${f.name}</b></td>
+          <td><b style="color:var(--ink-1);">${f.name}</b></td>
           <td><span class="mono">${f.type}</span></td>
           <td class="center">${f.required?stEl('是','fail'):stEl('否','gray')}</td>
-          <td style="color:#86909c;font-size:12px;">${f.note||'-'}</td>
+          <td style="color:var(--ink-3);font-size:12px;">${f.note||'-'}</td>
           <td>${stEl(f.status===1?'启用':'禁用',f.status===1?'ok':'gray')}</td>
-          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">禁用</button></td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:var(--danger);">禁用</button></td>
         </tr>`).join('')}</tbody>
       </table></div>
       <div class="pg-bar"><span class="info">共 <b>${SAP_FIELDS.length}</b> 个字段 · 基线 45 字段字典</span></div>
@@ -1613,6 +2078,7 @@ function renderSAP(){
 // ====================== 科目映射 ======================
 function renderAcct(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('科目 / 利润中心')}
     <div class="panel">
       <div class="filter-bar">
         <div class="field"><span class="lbl">业务</span><select class="sel"><option>全部</option><option>结转一</option><option>结转二</option><option>非现金流</option></select></div>
@@ -1628,8 +2094,8 @@ function renderAcct(){
           <td><span class="mono">${m.condition}</span></td>
           <td><span class="mono">${m.hkont}</span></td>
           <td>${stEl(m.koart,'info')}</td>
-          <td style="color:#86909c;">${m.remark}</td>
-          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">删除</button></td>
+          <td style="color:var(--ink-3);">${m.remark}</td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:var(--danger);">删除</button></td>
         </tr>`).join('')}</tbody>
       </table></div>
       <div class="pg-bar"><span class="info">共 <b>${ACCT_MAP.length}</b> 条科目映射 · 关联 <b>${new Set(ACCT_MAP.map(m=>m.biz)).size}</b> 个业务</span></div>
@@ -1640,6 +2106,7 @@ function renderAcct(){
 // ====================== 业务编码字典 ======================
 function renderBCDict(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('业务编码字典')}
     <div class="panel">
       <div class="filter-bar">
         <div class="grow"></div>
@@ -1649,11 +2116,11 @@ function renderBCDict(){
         <thead><tr><th style="width:40px;">#</th><th>业务</th><th>编码</th><th>说明</th><th>状态</th><th style="width:120px;">操作</th></tr></thead>
         <tbody>${BC_DICT.map((b,i)=>`<tr>
           <td class="center">${i+1}</td>
-          <td><b style="color:#1d2129;">${b.biz}</b></td>
+          <td><b style="color:var(--ink-1);">${b.biz}</b></td>
           <td><span class="mono">${b.code}</span></td>
-          <td style="color:#86909c;">${b.remark}</td>
+          <td style="color:var(--ink-3);">${b.remark}</td>
           <td>${stEl(b.status===1?'启用':'禁用',b.status===1?'ok':'gray')}</td>
-          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:#f53f3f;">禁用</button></td>
+          <td class="op"><button class="btn sm link">编辑</button><button class="btn sm link" style="color:var(--danger);">禁用</button></td>
         </tr>`).join('')}</tbody>
       </table></div>
       <div class="pg-bar"><span class="info">共 <b>${BC_DICT.length}</b> 个业务编码 · 用于 BATCHID 拼接</span></div>
@@ -1664,12 +2131,13 @@ function renderBCDict(){
 // ====================== 加工脚本配置 ======================
 function renderProc(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('加工脚本配置')}
     <div class="sql-layout">
       <div class="sql-list">
-        <div class="sql-list-head"><input class="ipt sql-list-search" placeholder="🔍 搜索业务 / 脚本编码" id="procKw" oninput="renderProcTb()" /></div>
+        <div class="sql-list-head"><input class="ipt sql-list-search" placeholder="搜索业务 / 脚本编码" id="procKw" oninput="renderProcTb()" /></div>
         <div class="sql-list-body" id="procTb"></div>
         <div style="padding:10px 16px;border-top:1px solid #f0f1f3;display:flex;justify-content:space-between;align-items:center;background:#fafbfc;">
-          <span style="font-size:12px;color:#86909c;">共 <b id="procTotal">0</b> 个加工脚本</span>
+          <span style="font-size:12px;color:var(--ink-3);">共 <b id="procTotal">0</b> 个加工脚本</span>
           <button class="btn sm primary" onclick="toast('已新建(演示)','success')">+ 新建</button>
         </div>
       </div>
@@ -1690,7 +2158,7 @@ function renderProcTb(){
       <div class="mt">
         ${stEl(t.sql_type,'info')}
         ${stEl(t.state===1?'启用':'禁用',t.state===1?'ok':'gray')}
-        <span style="font-size:11px;color:#86909c;">v${t.version}</span>
+        <span style="font-size:11px;color:var(--ink-3);">v${t.version}</span>
       </div>
     </div>
   `).join('');
@@ -1710,7 +2178,7 @@ function openProc(id){
 function renderProcDet(){
   const t=curProcTb;
   const el=document.getElementById('procDet');
-  if(!t){el.innerHTML=`<div class="empty" style="margin:auto;"><div class="ic">📋</div>请从左侧选择加工脚本</div>`;return;}
+  if(!t){el.innerHTML=`<div class="empty" style="margin:auto;">请从左侧选择加工脚本</div>`;return;}
   el.innerHTML=`
     <div class="sql-detail-head">
       <div>
@@ -1718,8 +2186,8 @@ function renderProcDet(){
         <div class="cd">${t.code} · 业务 ${t.biz} · 数据源 ${t.ds_code} · v${t.version}</div>
       </div>
       <div class="right">
-        <button class="btn warn" onclick="runProc()">🧪 试跑</button>
-        <button class="btn primary" onclick="saveProc()">💾 保存</button>
+        <button class="btn warn" onclick="runProc()">试跑</button>
+        <button class="btn primary" onclick="saveProc()">保存</button>
       </div>
     </div>
     <div class="sub-nav">
@@ -1740,13 +2208,13 @@ function renderProcDet(){
         <div class="fg full"><div class="lbl">说明</div><textarea class="ipt block">${t.remark}</textarea></div>
         <div class="fg full">
           <div class="lbl">审计</div>
-          <div style="font-size:12px;color:#86909c;">最后更新: ${t.update_time} by ${t.update_by} · 当前版本 v${t.version}</div>
+          <div style="font-size:12px;color:var(--ink-3);">最后更新: ${t.update_time} by ${t.update_by} · 当前版本 v${t.version}</div>
         </div>
       </div>
     </div>
     <div class="sub-pane ${curProcSub==='sql'?'active':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">
-        <span>📌 使用 <code>#{paramName}</code> 占位符 · 输出字段见 <code>sap_field_dict</code></span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:var(--ink-2);">
+        <span>参数格式：<code>#{paramName}</code></span>
         <div style="display:flex;gap:6px;">
           <button class="btn sm" onclick="toast('已格式化','success')">格式化</button>
           <button class="btn sm" onclick="toast('已复制','success')">复制</button>
@@ -1757,23 +2225,22 @@ function renderProcDet(){
     <div class="sub-pane ${curProcSub==='io'?'active':''}">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div>
-          <div style="font-size:13px;color:#4e5969;font-weight:500;margin-bottom:8px;">📥 输入参数 (${t.inputs.length})</div>
+          <div style="font-size:13px;color:var(--ink-2);font-weight:500;margin-bottom:8px;">输入参数 (${t.inputs.length})</div>
           <div class="tbl" style="max-height:380px;"><table>
             <thead><tr><th>#</th><th>形参名</th><th>类型</th></tr></thead>
               <tbody>${t.inputs.map((p,i)=>`<tr><td class="center">${i+1}</td><td><span class="mono">#{${p}}</span></td><td>${stEl(p.startsWith('temp_')||p.startsWith('v_')?'STRING':'STRING','info')}</td></tr>`).join('')}</tbody>
             </table></div>
         </div>
         <div>
-          <div style="font-size:13px;color:#4e5969;font-weight:500;margin-bottom:8px;">📤 输出字段 (SAP 凭证行 · ${t.outputs.length})</div>
+          <div style="font-size:13px;color:var(--ink-2);font-weight:500;margin-bottom:8px;">输出字段 (SAP 凭证行 · ${t.outputs.length})</div>
           <div class="tbl" style="max-height:380px;"><table>
             <thead><tr><th>#</th><th>字段名</th><th>来源</th></tr></thead>
-              <tbody>${t.outputs.map((f,i)=>`<tr><td class="center">${i+1}</td><td><span class="mono">${f}</span></td><td style="color:#86909c;font-size:11px;">${f==='HKONT'||f==='KOART'||f==='HKONT1'?'account_map':(f==='PRCTR'?'profit_center_map':(f==='BATCHID'||f==='MONAT'||f==='GJAHR'?'业务编码+派生':'常量'))}</td></tr>`).join('')}</tbody>
+              <tbody>${t.outputs.map((f,i)=>`<tr><td class="center">${i+1}</td><td><span class="mono">${f}</span></td><td style="color:var(--ink-3);font-size:11px;">${f==='HKONT'||f==='KOART'||f==='HKONT1'?'account_map':(f==='PRCTR'?'profit_center_map':(f==='BATCHID'||f==='MONAT'||f==='GJAHR'?'业务编码+派生':'常量'))}</td></tr>`).join('')}</tbody>
             </table></div>
         </div>
       </div>
     </div>
     <div class="sub-pane ${curProcSub==='history'?'active':''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;color:#4e5969;">📌 每次 UPDATE 自动产生快照</div>
       <div class="tbl" style="max-height:380px;"><table>
         <thead><tr><th>版本</th><th>操作人</th><th>操作时间</th><th style="width:140px;">操作</th></tr></thead>
         <tbody>${t.history.map((h,i)=>`<tr>
@@ -1816,6 +2283,7 @@ function saveProc(){
 // ====================== 操作日志 ======================
 function renderOpLog(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('操作日志')}
     <div class="panel">
       <div class="filter-bar">
         <div class="field"><span class="lbl">时间</span><input class="ipt" value="2026-09-22" /></div>
@@ -1823,7 +2291,7 @@ function renderOpLog(){
         <div class="field"><span class="lbl">模块</span><select class="sel"><option>全部</option><option>结转一</option><option>结转二</option><option>数据源管理</option><option>SQL 模板</option></select></div>
         <div class="field"><span class="lbl">状态</span><select class="sel"><option>全部</option><option>成功</option><option>失败</option></select></div>
         <div class="grow"></div>
-        <button class="btn" onclick="toast('已导出','success')">📥 导出</button>
+        <button class="btn" onclick="toast('已导出','success')">导出</button>
       </div>
       <div class="tbl"><table>
         <thead><tr><th>时间</th><th>操作人</th><th>模块</th><th>操作内容</th><th>IP</th><th>耗时</th><th>状态</th><th>trace_id</th></tr></thead>
@@ -1831,14 +2299,14 @@ function renderOpLog(){
           <td><span class="mono">${l.ts}</span></td>
           <td>${l.user}</td>
           <td>${l.module}</td>
-          <td>${l.op}${l.err?`<br><span style="color:#f53f3f;font-size:11px;">${l.err}</span>`:''}</td>
+          <td>${l.op}${l.err?`<br><span style="color:var(--danger);font-size:11px;">${l.err}</span>`:''}</td>
           <td><span class="mono">${l.ip}</span></td>
           <td>${l.cost}</td>
           <td>${stEl(l.status,l.status==='成功'?'ok':'fail')}</td>
           <td><span class="mono ellipsis" style="max-width:180px;">${l.trace}</span></td>
         </tr>`).join('')}</tbody>
       </table></div>
-      <div class="pg-bar"><span class="info">共 <b>${OP_LOGS.length}</b> 条 · 哈希链已落 OSS 归档</span></div>
+      <div class="pg-bar"><span class="info">共 <b>${OP_LOGS.length}</b> 条</span></div>
     </div>
   `;
 }
@@ -1846,12 +2314,13 @@ function renderOpLog(){
 // ====================== 业务快照 ======================
 function renderSnap(){
   document.getElementById('root').innerHTML=`
+    ${pageHead('业务快照')}
     <div class="panel">
       <div class="filter-bar">
         <div class="field"><span class="lbl">业务</span><select class="sel"><option>全部</option><option>结转一</option><option>结转二</option></select></div>
         <div class="field"><span class="lbl">类型</span><select class="sel"><option>全部</option><option>SOURCE</option><option>TEMP_TABLE</option><option>PROCESS</option><option>VOUCHER</option><option>PUSH</option></select></div>
         <div class="grow"></div>
-        <button class="btn" onclick="toast('已刷新 OSS','success')">🔄 刷新 OSS</button>
+        <button class="btn" onclick="toast('已刷新 OSS','success')">刷新 OSS</button>
       </div>
       <div class="tbl"><table>
         <thead><tr><th>trace_id</th><th>业务</th><th>类型</th><th>账期</th><th>大小</th><th>生成时间</th><th>操作人</th><th style="width:140px;">操作</th></tr></thead>
@@ -1864,17 +2333,18 @@ function renderSnap(){
           <td>${s.time}</td>
           <td>${s.user}</td>
           <td class="op">
-            <button class="btn sm link" onclick="toast('下载快照','success')">📥 下载</button>
+            <button class="btn sm link" onclick="toast('下载快照','success')">下载</button>
             <button class="btn sm link" onclick="toast('查看详情','success')">详情</button>
           </td>
         </tr>`).join('')}</tbody>
       </table></div>
-      <div class="pg-bar"><span class="info">共 <b>${SNAPSHOTS.length}</b> 个快照 · 8 类快照(SOURCE/TEMP_TABLE/PROCESS/VOUCHER/MSG/PUSH/RECEIPT/LOG)</span></div>
+      <div class="pg-bar"><span class="info">共 <b>${SNAPSHOTS.length}</b> 个快照</span></div>
     </div>
   `;
 }
 
 // 初始化
+document.getElementById('demoAccount').value=currentUser;
 renderBiz('settle02');
 </script>
 </body>
