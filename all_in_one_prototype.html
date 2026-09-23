@@ -46,6 +46,12 @@ button,input,select,textarea{font-family:inherit}
 /* ===== 页头 ===== */
 .page-head{margin-bottom:20px}
 .page-head h1{font-size:20px;line-height:28px;font-weight:600;color:var(--ink-1)}
+.workflow-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;border:1px solid var(--line);border-radius:4px;background:#fff}
+.workflow-bar .details{flex:1;color:var(--ink-2);font-size:13px}
+.workflow-bar.readonly{background:#faf6ee;border-color:#e9dcc3}
+.upload-info{font-size:12px;color:var(--ink-3);margin-bottom:12px;overflow-wrap:anywhere}
+.upload-error{color:var(--danger);font-size:13px;margin:12px 0;white-space:pre-wrap}
+.import-note{font-size:13px;color:var(--ink-2);margin:12px 0}
 
 /* ===== 面板 / 卡片 ===== */
 .panel{background:var(--card);border-radius:6px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
@@ -291,8 +297,11 @@ td.op .btn+.btn{margin-left:4px}
   <div class="brand"><b>智能财务月结系统</b></div>
   <div class="crumb"><span id="crumbGroup">月结管理</span> / <b id="crumbMain">结转二</b></div>
   <div class="user">
-    <span>W8406768@XZ</span>
-    <div class="av">黄</div>
+    <label for="demoAccount">演示账号</label>
+    <select class="sel" id="demoAccount" aria-label="切换演示账号" onchange="switchAccount(this.value)">
+      <option value="W8406768@XZ">W8406768@XZ</option>
+      <option value="W8406769@XZ">W8406769@XZ</option>
+    </select>
   </div>
 </div>
 
@@ -335,25 +344,37 @@ td.op .btn+.btn{margin-left:4px}
     批量审核请返回列表操作。
   </div></div>
   <div class="dlg-foot"><button class="btn primary" onclick="closeDlg('dlgAudit')">关闭</button>
-    <button class="btn danger" onclick="auditConfirm(0)">仅驳回此条</button></div>
+    <button class="btn danger" data-biz-action onclick="auditConfirm(0)">仅驳回此条</button></div>
 </div></div>
 
 <div class="mask" id="dlgBatch"><div class="dlg" style="width:560px;">
   <div class="dlg-head"><h3>批量审核</h3><span class="close" onclick="closeDlg('dlgBatch')">✕</span></div>
   <div class="dlg-body" id="dlgBatchBody"></div>
   <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgBatch')">取消</button>
-    <button class="btn danger" onclick="batchConfirm(0)">全部驳回</button>
-    <button class="btn primary" onclick="batchConfirm(1)">全部通过</button></div>
+    <button class="btn danger" data-biz-action onclick="batchConfirm(0)">全部驳回</button>
+    <button class="btn primary" data-biz-action onclick="batchConfirm(1)">全部通过</button></div>
 </div></div>
 
 <div class="mask" id="dlgPost"><div class="dlg">
-  <div class="dlg-head"><h3>过账详情</h3><span class="close" onclick="closeDlg('dlgPost')">✕</span></div>
+  <div class="dlg-head"><h3>详细日志</h3><span class="close" onclick="closeDlg('dlgPost')">✕</span></div>
   <div class="dlg-body"><div style="display:flex;justify-content:space-between;margin-bottom:12px;">
-    <div style="font-weight:600;font-size:14px;">批次明细</div>
-    <div style="color:var(--ink-3);font-size:13px;">共 <b id="dlgPostCnt" style="color:var(--ink-1);">2</b> 条</div></div>
+    <div style="font-weight:600;font-size:14px;">处理流程</div>
+    <div style="color:var(--ink-3);font-size:13px;">共 <b id="dlgPostCnt" style="color:var(--ink-1);">6</b> 个环节</div></div>
     <div id="dlgPostBody"></div></div>
   <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgPost')">关闭</button>
-    <button class="btn primary" onclick="toast('已重新过账','success');closeDlg('dlgPost')">重新过账</button></div>
+    <button class="btn primary" data-biz-action id="retryPosting" onclick="retryPosting()">重新过账</button></div>
+</div></div>
+
+<div class="mask" id="dlgVoucherUpload"><div class="dlg wide">
+  <div class="dlg-head"><h3>上传调整凭证</h3><span class="close" onclick="closeDlg('dlgVoucherUpload')">✕</span></div>
+  <div class="dlg-body">
+    <p class="import-note">请上传本页导出并调整后的 UTF-8 CSV 文件（最多 5 MB、10,000 行），保留表头、业务编码和账期。Excel 编辑后请另存为 CSV UTF-8。</p>
+    <input type="file" data-biz-action id="voucherFile" accept=".csv,text/csv" onchange="previewVoucherFile(this.files[0])" />
+    <div id="voucherUploadError" class="upload-error" role="alert"></div>
+    <div id="voucherPreview"></div>
+  </div>
+  <div class="dlg-foot"><button class="btn" onclick="closeDlg('dlgVoucherUpload')">取消</button>
+    <button class="btn primary" data-biz-action id="confirmVoucherUpload" disabled onclick="confirmVoucherUpload()">确认替换并送审</button></div>
 </div></div>
 
 <!-- 数据源编辑/新增弹窗 -->
@@ -595,6 +616,7 @@ const EDA_DATA = [
   {mid:'EDA@891;20260311144937;58628;01',file:'DAPM_MSS_INCOME.20260311.202509.06.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'-',ts:'2026-03-11 14:49:37',c:'未采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'},
   {mid:'EDA@891;20260311140908;03429;01',file:'DAPM_MSS_INCOME.20260311.202509.06.001.001.854.DAT',path:'/data/program/src/zyg/file',batch:'-',ts:'2026-03-11 14:09:08',c:'未采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'}
 ];
+for(const b of Object.values(BIZ)) b.eda=EDA_DATA.map(row=>({...row}));
 
 const DSM = [
   {id:1,code:'ads_mysql',name:'数据门户(广告库)',db_type:'MYSQL',jdbc_url:'jdbc:mysql://10.18.0.21:3306/ads_db',username:'ads_reader',pool_min:2,pool_max:8,group:'数据门户',state:1,update_time:'2026-09-12 14:23:11'},
@@ -777,15 +799,27 @@ const SNAPSHOTS = [
 
 // ====================== 通用工具 ======================
 function fmt(n,d=2){return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function statusClass(value){
+  if(['成功','已通过','已采集','校验通过'].includes(value))return 'ok';
+  if(['失败','通知失败','校验失败','已驳回'].includes(value))return 'fail';
+  return !value||value==='-'||value==='未采集'?'gray':'warn';
+}
 function st(t,k='gray'){return `<span class="st ${k}">${t}</span>`}
 function pageHead(title){return `<div class="page-head"><h1>${title}</h1></div>`}
 let _tt=null;
 function toast(msg,k=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+k;if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),1800)}
-function closeDlg(id){document.getElementById(id).classList.remove('show')}
+function closeDlg(id){
+  document.getElementById(id).classList.remove('show');
+  if(id==='dlgVoucherUpload'){uploadContext=null;pendingImport=null;uploadSequence++}
+  if(id==='dlgBatch')batchTarget=null;
+}
 
 // ====================== 菜单切换 ======================
 const CRUMB_GROUP={biz:'月结管理',dsm:'基础配置',sql:'基础配置',proc:'基础配置',sap:'基础配置',acct:'基础配置',bcdict:'基础配置',oplog:'系统',snap:'系统'};
 function goMenu(page, code){
+  closeBusinessDialogs();
+  currentPage=page;
   document.querySelectorAll('.sidebar .mi').forEach(el=>el.classList.remove('active'));
   const target=document.querySelector(`.sidebar .mi[data-page="${page}"][data-code="${code||''}"]`) ||
                document.querySelector(`.sidebar .mi[data-page="${page}"]:not([data-code])`);
@@ -812,20 +846,182 @@ document.querySelectorAll('.sidebar .mi').forEach(el=>{
 
 // ====================== 九大业务页面 ======================
 let curBiz='settle02';
+let currentPage='biz';
 let auditTarget=null;
+let batchTarget=null;
 const expanded={};
+const DEMO_ACCOUNTS=['W8406768@XZ','W8406769@XZ'];
+let currentUser=DEMO_ACCOUNTS[0];
+try{
+  const saved=sessionStorage.getItem('finance-demo-account');
+  if(DEMO_ACCOUNTS.includes(saved))currentUser=saved;
+}catch{}
+let storageFault=false;
+let applyingBusinessAction=false;
+let lastWorkflowState='';
+function workflowKey(code=curBiz){return `finance-workflow-v1:${BIZ[code].code}:${BIZ[code].period}`}
+function readWorkflow(code=curBiz){
+  const raw=localStorage.getItem(workflowKey(code));
+  if(!raw)return {owner:null,token:null,acquiredAt:null,data:null};
+  const state=JSON.parse(raw);
+  if(!state||!('owner' in state)||state.owner!==null&&!DEMO_ACCOUNTS.includes(state.owner)||
+     state.owner&&typeof state.token!=='string'||!state.data||
+     !Array.isArray(state.data.v1)||!Array.isArray(state.data.t1)||!Array.isArray(state.data.eda))
+    throw new Error('业务状态无法读取');
+  return state;
+}
+function businessData(code=curBiz){
+  const b=BIZ[code];
+  return {t1:b.t1,v1:b.v1,eda:b.eda,excel_data:b.excel_data,excel_files:b.excel_files,voucherUpload:b.voucherUpload};
+}
+function hydrateBusiness(state,code=curBiz){if(state.data)Object.assign(BIZ[code],structuredClone(state.data))}
+function currentAccess(){
+  try{return readWorkflow()}catch{storageFault=true;return null}
+}
+function ownsBusiness(){
+  const state=currentAccess();
+  return !storageFault&&state?.owner===currentUser;
+}
+function requireBusinessOwner(){
+  if(ownsBusiness())return true;
+  updateBusinessAccess();
+  toast(storageFault?'浏览器存储不可用，无法执行操作':'请先申请出账；业务被其他账号占用时仅可查看','error');
+  return false;
+}
+function closeBusinessDialogs(){
+  ['dlgAudit','dlgBatch','dlgPost','dlgVoucherUpload'].forEach(closeDlg);
+  auditTarget=null;postingTarget=null;
+}
+function updateBusinessAccess(){
+  const bar=document.getElementById('workflowBar');
+  if(!bar)return;
+  const state=currentAccess();
+  const own=!storageFault&&state?.owner===currentUser;
+  bar.classList.toggle('readonly',!own&&Boolean(state?.owner));
+  const text=storageFault?'浏览器存储不可用，当前只读':
+    !state?.owner?'尚未申请出账':own?`当前账号独占 · 申请时间 ${state.acquiredAt}`:`${state.owner} 正在出账，当前只读`;
+  bar.innerHTML=`<span class="st ${own?'info':'gray'}">${own?'出账中':'只读'}</span>
+    <div class="details">账期 ${BIZ[curBiz].period} · ${escapeHtml(text)}</div>
+    <button class="btn ${own?'':'primary'}" ${storageFault||!own&&state?.owner?'disabled':''} onclick="${own?'releaseWorkflow()':'claimWorkflow()'}">${own?'释放流程':'申请出账'}</button>`;
+  document.querySelectorAll('#bizPanel button:not([data-read]), #bizPanel input, #bizPanel select, #bizPanel textarea, [data-biz-action]').forEach(el=>el.disabled=!own);
+  const confirmButton=document.getElementById('confirmVoucherUpload');
+  confirmButton.disabled=!own||!pendingImport;
+  const row=postingTarget?.biz===curBiz?BIZ[curBiz].eda.find(r=>r.mid===postingTarget.mid):null;
+  document.getElementById('retryPosting').disabled=!own||!row||!['已通过','校验通过'].includes(row.v1);
+}
+async function workflowTransaction(code,action){
+  if(!navigator.locks){
+    toast('当前浏览器不支持流程锁，请使用最新版 Chrome 或 Edge','error');
+    return;
+  }
+  try{
+    await navigator.locks.request(workflowKey(code),()=>action());
+  }catch(error){
+    storageFault=true;
+    closeBusinessDialogs();refreshBusinessView();updateBusinessAccess();
+    toast('业务状态保存失败，已停止操作；请检查浏览器存储设置','error');
+  }
+}
+async function claimWorkflow(){
+  const code=curBiz,user=currentUser;
+  if(storageFault)return;
+  await workflowTransaction(code,()=>{
+    if(currentPage!=='biz'||curBiz!==code||currentUser!==user)return;
+    const state=readWorkflow(code);
+    if(state.owner&&state.owner!==user){refreshBusinessView();return toast(`${state.owner} 已申请出账，当前只读`,'error')}
+    hydrateBusiness(state,code);
+    state.owner=user;
+    state.token=state.token||crypto.randomUUID();
+    state.acquiredAt=state.acquiredAt||new Date().toLocaleString('sv-SE');
+    state.data=businessData(code);
+    localStorage.setItem(workflowKey(code),JSON.stringify(state));
+    refreshBusinessView();
+    toast('申请成功，当前账号独占此业务账期','success');
+  });
+}
+async function releaseWorkflow(){
+  if(!requireBusinessOwner()||!confirm('确认释放当前业务账期？释放后其他账号可申请出账。'))return;
+  const code=curBiz,user=currentUser,token=readWorkflow(code).token;
+  await workflowTransaction(code,()=>{
+    const state=readWorkflow(code);
+    if(state.owner!==user||state.token!==token||currentUser!==user)return;
+    state.owner=null;state.token=null;state.acquiredAt=null;
+    localStorage.setItem(workflowKey(code),JSON.stringify(state));
+    if(curBiz===code&&currentPage==='biz'){closeBusinessDialogs();refreshBusinessView()}
+    toast('流程已释放','success');
+  });
+}
+async function writeBusiness(action){
+  if(!requireBusinessOwner())return;
+  const code=curBiz,user=currentUser,token=readWorkflow(code).token;
+  await workflowTransaction(code,()=>{
+    const state=readWorkflow(code);
+    if(currentPage!=='biz'||curBiz!==code||currentUser!==user||state.owner!==user||state.token!==token)
+      return toast('流程归属已变化，操作已取消','error');
+    hydrateBusiness(state,code);
+    const previous=structuredClone(businessData(code));
+    applyingBusinessAction=true;
+    try{
+      action();
+      state.data=businessData(code);
+      localStorage.setItem(workflowKey(code),JSON.stringify(state));
+      lastWorkflowState=JSON.stringify(state);
+    }catch(error){
+      Object.assign(BIZ[code],previous);
+      throw error;
+    }finally{applyingBusinessAction=false}
+    updateBusinessAccess();
+  });
+}
+function refreshBusinessView(){
+  if(currentPage!=='biz')return;
+  const tab=document.querySelector('#bizPanel .tab-nav-item.active')?.dataset.tab||'t1';
+  const sub=document.querySelector('#bizPanel .sub-nav-item.active')?.dataset.sub||'s3';
+  const filters=['voucherBatch','voucherSide','kw3','fltSt'].map(id=>[id,document.getElementById(id)?.value||'']);
+  renderBiz(curBiz);
+  const tabEl=document.querySelector(`#bizPanel [data-tab="${tab}"]`);
+  if(tabEl)switchBizTab(tab,tabEl);
+  const subEl=document.querySelector(`#bizPanel [data-sub="${sub}"]`);
+  if(subEl)switchSub(sub,subEl);
+  for(const [id,value] of filters){const el=document.getElementById(id);if(el)el.value=value}
+  renderT2();renderT3();updateBusinessAccess();
+}
+function switchAccount(user){
+  if(!DEMO_ACCOUNTS.includes(user))return;
+  currentUser=user;
+  try{sessionStorage.setItem('finance-demo-account',user)}catch{}
+  closeBusinessDialogs();refreshBusinessView();
+}
+function syncWorkflow(){
+  if(currentPage!=='biz'||applyingBusinessAction)return;
+  const state=currentAccess();
+  if(!state){updateBusinessAccess();return}
+  if(JSON.stringify(state)!==lastWorkflowState){closeBusinessDialogs();refreshBusinessView()}
+}
+window.addEventListener('storage',event=>{if(event.key===null||event.key===workflowKey())syncWorkflow()});
+window.addEventListener('focus',syncWorkflow);
+for(const type of ['click','change','input'])document.addEventListener(type,event=>{
+  const control=event.target.closest?.('#bizPanel button:not([data-read]), #bizPanel input, #bizPanel select, #bizPanel textarea, [data-biz-action]');
+  if(control&&!requireBusinessOwner()){event.preventDefault();event.stopImmediatePropagation()}
+},true);
 
 function renderBiz(code){
   curBiz=code;
+  currentPage='biz';
+  if(!applyingBusinessAction){
+    const state=currentAccess();
+    if(state){hydrateBusiness(state);lastWorkflowState=JSON.stringify(state)}
+  }
   const b=BIZ[code];
   document.getElementById('root').innerHTML = `
     ${pageHead(b.name)}
-    <div class="panel">
+    <div class="workflow-bar" id="workflowBar"></div>
+    <div class="panel" id="bizPanel">
       <div class="tab-nav">
-        <div class="tab-nav-item active" onclick="switchBizTab('t1',this)">数据获取</div>
-        ${b.excel_required ? `<div class="tab-nav-item" onclick="switchBizTab('excel',this)">Excel 审核</div>` : ''}
-        <div class="tab-nav-item" onclick="switchBizTab('t2',this)">凭证加工</div>
-        <div class="tab-nav-item" onclick="switchBizTab('t3',this)">EDA 上传与过账</div>
+        <div class="tab-nav-item active" data-tab="t1" onclick="switchBizTab('t1',this)">数据获取</div>
+        ${b.excel_required ? `<div class="tab-nav-item" data-tab="excel" onclick="switchBizTab('excel',this)">Excel 审核</div>` : ''}
+        <div class="tab-nav-item" data-tab="t2" onclick="switchBizTab('t2',this)">凭证加工</div>
+        <div class="tab-nav-item" data-tab="t3" onclick="switchBizTab('t3',this)">EDA 上传与过账</div>
       </div>
       <div class="tab-pane active" id="biz-t1">
         ${b.excel_required ? renderExcelUpload(b) : ''}
@@ -927,12 +1123,15 @@ function renderBiz(code){
         ${b.excel_required ? renderMergeBox(b) : ''}
         <div class="summary" id="sumBox"></div>
         <div class="filter-bar">
-          <div class="field"><span class="lbl">BATCHID</span><input class="ipt" placeholder="${b.code.toUpperCase()+b.period+code.toUpperCase().slice(-3)+'00'}" /></div>
-          <div class="field"><span class="lbl">借贷</span><select class="sel"><option>全部</option><option>贷 H</option><option>借 S</option></select></div>
+          <div class="field"><span class="lbl">BATCHID</span><input class="ipt" id="voucherBatch" placeholder="批次号" oninput="renderT2()" /></div>
+          <div class="field"><span class="lbl">借贷</span><select class="sel" id="voucherSide" onchange="renderT2()"><option value="">全部</option><option value="H">贷 H</option><option value="S">借 S</option></select></div>
           <div class="grow"></div>
-          <button class="btn" onclick="toast('已导出 SAP 报文','success')">导出</button>
+          <button class="btn accent" onclick="openVoucherAudit()">批量审核 <span class="count" id="voucherPending">0</span></button>
+          <button class="btn" onclick="exportVouchers()" title="导出当前业务账期的全部凭证">导出</button>
+          <button class="btn" onclick="openVoucherUpload()">上传</button>
           <button class="btn" onclick="renderT2()">刷新</button>
         </div>
+        <div id="voucherUploadInfo" class="upload-info"></div>
         <div class="tbl"><table>
           <thead><tr>
             <th style="width:30px;"></th><th>BATCHID</th><th>SUBID</th><th>REDID</th><th>BUKRS</th>
@@ -947,7 +1146,7 @@ function renderBiz(code){
         <div class="acquire-bar">
           <div class="field"><span class="lbl">扫描目录</span><input class="ipt" value="/data/program/src/zyg/file" style="min-width:280px;" /></div>
           <div class="right">
-            <button class="btn primary" onclick="addEda();toast('已生成 SAP 报文文件','success')">生成文件</button>
+            <button class="btn primary" onclick="addEda()">生成文件</button>
             <button class="btn" onclick="toast('扫描完成','success')">重新扫描</button>
             <button class="btn" onclick="toast('已发起采集请求','success')">请求采集</button>
             <button class="btn" onclick="renderT3()">刷新</button>
@@ -970,15 +1169,15 @@ function renderBiz(code){
         <div class="sub-pane" id="s2"><div class="empty">当前目录下无可上传文件</div></div>
         <div class="sub-pane active" id="s3">
           <div class="filter-bar">
-            <div class="field"><span class="lbl">关键字</span><input class="ipt" placeholder="消息id / 文件名" id="kw3" /></div>
-            <div class="field"><span class="lbl">采集状态</span><select class="sel" id="fltSt"><option>全部</option><option>通知失败</option><option>已采集</option></select></div>
+            <div class="field"><span class="lbl">关键字</span><input class="ipt" placeholder="消息id / 文件名" id="kw3" oninput="renderT3()" /></div>
+            <div class="field"><span class="lbl">采集状态</span><select class="sel" id="fltSt" onchange="renderT3()"><option>全部</option><option>未采集</option><option>通知失败</option><option>已采集</option></select></div>
             <div class="grow"></div>
             <button class="btn" onclick="toast('已导出','success')">导出</button>
           </div>
           <div class="tbl"><table>
             <thead><tr>
               <th>消息id</th><th>文件名</th><th>批次号</th><th>上传时间</th>
-              <th>采集状态</th><th>解析1</th><th>解析2</th><th>入库效验</th>
+              <th>采集状态</th><th>解析1</th><th>解析2</th><th>入库效验</th><th>过账效验</th>
               <th style="width:90px;">操作</th>
             </tr></thead>
             <tbody id="t3Body"></tbody>
@@ -991,6 +1190,7 @@ function renderBiz(code){
   renderT2();
   renderT3();
   if(BIZ[code].excel_required) renderExcel();
+  updateBusinessAccess();
 }
 
 function renderExcelUpload(b){
@@ -1064,10 +1264,11 @@ function renderExcel(){
 }
 
 function simulateUpload(){
+  return writeBusiness(()=>{
   const b=BIZ[curBiz];
   if(!b.excel_files)return;
   const now=new Date();
-  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'2')}-${String(now.getDate()).padStart(2,'2')} ${String(now.getHours()).padStart(2,'2')}:${String(now.getMinutes()).padStart(2,'2')}:${String(now.getSeconds()).padStart(2,'2')}`;
+  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
   const fname=`集团_${b.name}_${b.period}_拉萨分公司_${ts.replace(/[-: ]/g,'')}.xlsx`;
   b.excel_files.unshift({name:fname,uploader:'财务部/演示用户',upload_time:ts,rows:b.excel_data.length,size:(1+Math.random()).toFixed(1)+' MB',state:'解析成功',period:b.period});
   // 模拟几条新解析数据
@@ -1085,6 +1286,7 @@ function simulateUpload(){
   toast(`已上传 ${fname},解析 ${b.excel_data.length} 条数据`,'success');
   // 重新渲染整个 biz 页面以更新列表
   renderBiz(curBiz);
+  });
 }
 
 function renderMergeBox(b){
@@ -1121,10 +1323,175 @@ function renderMergeBox(b){
   `;
 }
 
+const VOUCHER_COLUMNS=[
+  ['batch','BATCHID'],['sub','SUBID'],['red','REDID'],['buk','BUKRS'],
+  ['gj','GJAHR'],['mo','MONAT'],['txt','BKTXT'],['hkont','HKONT'],['koart','KOART'],
+  ['shkzg','SHKZG'],['waers','WAERS'],['amt','BWRBTR(分)'],['prctr','PRCTR'],['budat','BUDAT']
+];
+const VOUCHER_HEADER=['业务编码','账期',...VOUCHER_COLUMNS.map(([,label])=>label)];
+function voucherRows(b){
+  const batch=(document.getElementById('voucherBatch')?.value||'').trim().toLowerCase();
+  const side=document.getElementById('voucherSide')?.value||'';
+  return b.v1.map((row,index)=>({row,index})).filter(({row})=>(!batch||row.batch.toLowerCase().includes(batch))&&(!side||row.shkzg===side));
+}
+function voucherBalance(rows){
+  const groups=new Map();
+  for(const r of rows){
+    const key=[r.batch,r.sub,r.buk,r.waers].join('/');
+    const group=groups.get(key)||{debit:0,credit:0};
+    group[r.shkzg==='S'?'debit':'credit']+=Math.round(r.amt*100);
+    if(!Number.isSafeInteger(group.debit)||!Number.isSafeInteger(group.credit))throw new Error('凭证合计金额超出支持范围');
+    groups.set(key,group);
+  }
+  return [...groups].filter(([,g])=>g.debit!==g.credit).map(([key])=>key);
+}
+function csvCell(value){
+  let text=String(value);
+  if(typeof value==='string'&&/^(?:[=+\-@\t\r']|0\d)/.test(text))text="'"+text;
+  return '"'+text.replace(/"/g,'""')+'"';
+}
+function voucherCSV(b){
+  return '\uFEFF'+[VOUCHER_HEADER,...b.v1.map(r=>[b.code,b.period,...VOUCHER_COLUMNS.map(([key])=>key==='amt'?Math.round(r.amt*100):r[key])])]
+    .map(row=>row.map(csvCell).join(',')).join('\r\n');
+}
+function exportVouchers(){
+  if(!requireBusinessOwner())return;
+  hydrateBusiness(readWorkflow());
+  const b=BIZ[curBiz];
+  const url=URL.createObjectURL(new Blob([voucherCSV(b)],{type:'text/csv;charset=utf-8'}));
+  const link=document.createElement('a');
+  link.href=url;link.download=`${b.name}_${b.period}_加工凭证.csv`;
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,'');
+  const rows=[];let row=[],field='',quoted=false,closed=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){
+      if(ch==='"'){
+        if(text[i+1]==='"'){field+='"';i++}else{quoted=false;closed=true}
+      }else field+=ch;
+    }else if(ch===','||ch==='\n'||ch==='\r'){
+      row.push(field);field='';closed=false;
+      if(ch!==','){rows.push(row);row=[];if(ch==='\r'&&text[i+1]==='\n')i++}
+    }else if(ch==='"'&&!field&&!closed)quoted=true;
+    else if(closed||ch==='"')throw new Error('CSV 引号格式错误，请从导出文件另存为 CSV UTF-8');
+    else field+=ch;
+  }
+  if(quoted)throw new Error('CSV 引号未闭合');
+  if(field||row.length||closed){row.push(field);rows.push(row)}
+  return rows.filter(row=>row.some(value=>value.trim()));
+}
+function parseVoucherCSV(text,b){
+  const [header,...rows]=parseCSV(text);
+  if(!header||header.join('\0')!==VOUCHER_HEADER.join('\0'))throw new Error('表头不匹配，请使用本页导出的 CSV 文件');
+  if(!rows.length||rows.length>10000)throw new Error('文件应包含 1 至 10,000 行凭证数据');
+  const seen=new Set();
+  const result=rows.map((cells,i)=>{
+    const fail=message=>{throw new Error(`第 ${i+2} 行：${message}`)};
+    if(cells.length!==VOUCHER_HEADER.length)fail('列数不正确');
+    const values=cells.map(value=>value.replace(/^'/,'').trim());
+    if(values.some(value=>!value||value.length>200||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)))fail('存在空字段、超长字段或无效字符');
+    if(values[0].padStart(9,'0')!==b.code||values[1]!==b.period)fail('业务编码或账期与当前页面不一致');
+    const r=Object.fromEntries(VOUCHER_COLUMNS.map(([key],index)=>[key,values[index+2]]));
+    if(!/^\d+$/.test(r.amt)||!Number.isSafeInteger(Number(r.amt))||Number(r.amt)>9000000000000)fail('金额必须为有效的非负整数，单位为分');
+    r.amt=Number(r.amt)/100;
+    r.mo=r.mo.padStart(2,'0');r.sub=r.sub.padStart(3,'0');
+    if(r.gj+r.mo!==b.period)fail('凭证年度、月份与账期不一致');
+    if(!['S','H'].includes(r.shkzg))fail('借贷标识必须为 S 或 H');
+    if(!['S','D','K','A','M'].includes(r.koart))fail('科目类型无效');
+    if(!/^[A-Z]{3}$/.test(r.waers))fail('币种须为三位大写字母');
+    for(const key of ['batch','sub','red','buk','hkont','prctr'])if(!/^[A-Za-z0-9_.-]+$/.test(r[key]))fail(`${key} 编码包含无效字符`);
+    if(!/^\d{8}$/.test(r.budat)||r.budat.slice(0,6)!==b.period)fail('记账日期应为当前账期的 YYYYMMDD');
+    const date=new Date(`${r.budat.slice(0,4)}-${r.budat.slice(4,6)}-${r.budat.slice(6,8)}T00:00:00Z`);
+    if(Number.isNaN(date.getTime())||date.toISOString().slice(0,10).replace(/-/g,'')!==r.budat)fail('记账日期无效');
+    const id=[r.batch,r.sub,r.red].join('/');
+    if(seen.has(id))fail('BATCHID、SUBID、REDID 重复');
+    seen.add(id);
+    return {...r,st:'待审核'};
+  });
+  const unbalanced=voucherBalance(result);
+  if(unbalanced.length)throw new Error(`凭证借贷不平衡：${unbalanced[0]}。请按批次、子凭证、公司及币种核对。`);
+  return result;
+}
+let uploadContext=null;
+let pendingImport=null;
+let uploadSequence=0;
+function openVoucherUpload(){
+  if(!requireBusinessOwner())return;
+  uploadContext={biz:curBiz,user:currentUser,token:readWorkflow().token,source:JSON.stringify(BIZ[curBiz].v1)};
+  pendingImport=null;uploadSequence++;
+  document.getElementById('voucherFile').value='';
+  document.getElementById('voucherUploadError').textContent='';
+  document.getElementById('voucherPreview').innerHTML='';
+  document.getElementById('confirmVoucherUpload').disabled=true;
+  document.getElementById('dlgVoucherUpload').classList.add('show');
+}
+async function previewVoucherFile(file){
+  if(!requireBusinessOwner())return;
+  const sequence=++uploadSequence;
+  pendingImport=null;
+  document.getElementById('confirmVoucherUpload').disabled=true;
+  document.getElementById('voucherUploadError').textContent='';
+  document.getElementById('voucherPreview').innerHTML='';
+  if(!file||!uploadContext)return;
+  const context=uploadContext;
+  try{
+    if(!/\.csv$/i.test(file.name)||file.size>5*1024*1024)throw new Error('请选择 5 MB 以内的 CSV 文件');
+    const text=new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer());
+    if(sequence!==uploadSequence||context!==uploadContext||context.user!==currentUser||!ownsBusiness())return;
+    const rows=parseVoucherCSV(text,BIZ[context.biz]);
+    pendingImport={...context,rows,fileName:file.name};
+    document.getElementById('voucherPreview').innerHTML=`
+      <p class="import-note">校验通过 · ${rows.length} 行 · 借贷平衡。确认后替换当前业务账期的全部凭证，所有记录重新审核。</p>
+      <div class="tbl"><table><thead><tr><th>批次</th><th>科目</th><th>摘要</th><th>借贷</th><th class="num">金额（分）</th></tr></thead>
+      <tbody>${rows.slice(0,10).map(r=>`<tr><td>${escapeHtml(r.batch)}</td><td>${escapeHtml(r.hkont)}</td><td>${escapeHtml(r.txt)}</td><td>${r.shkzg==='S'?'借':'贷'}</td><td class="num">${fmt(Math.round(r.amt*100),0)}</td></tr>`).join('')}</tbody></table></div>
+      ${rows.length>10?'<p class="import-note">仅预览前 10 行。</p>':''}`;
+    document.getElementById('confirmVoucherUpload').disabled=false;
+  }catch(error){
+    if(sequence===uploadSequence)document.getElementById('voucherUploadError').textContent=error instanceof TypeError?'文件编码无效，请另存为 CSV UTF-8':error.message;
+  }
+}
+function confirmVoucherUpload(){
+  return writeBusiness(()=>{
+  if(!pendingImport||pendingImport.biz!==curBiz||pendingImport.user!==currentUser||pendingImport.token!==readWorkflow().token)return;
+  const b=BIZ[curBiz];
+  if(JSON.stringify(b.v1)!==pendingImport.source)return toast('凭证已发生变化，请重新上传','error');
+  b.v1=pendingImport.rows;
+  b.voucherUpload={name:pendingImport.fileName,time:new Date().toLocaleString('sv-SE'),rows:b.v1.length,user:currentUser};
+  pendingImport=null;uploadContext=null;
+  for(const key of Object.keys(expanded))delete expanded[key];
+  document.getElementById('voucherBatch').value='';
+  document.getElementById('voucherSide').value='';
+  closeDlg('dlgVoucherUpload');renderT2();
+  toast('调整凭证已上传，等待批量审核','success');
+  });
+}
+function openVoucherAudit(){
+  if(!requireBusinessOwner())return;
+  const b=BIZ[curBiz];
+  const selected=voucherRows(b).filter(({row})=>row.st==='待审核');
+  if(!selected.length)return toast('当前范围没有待审核凭证');
+  batchTarget={biz:curBiz,user:currentUser,token:readWorkflow().token,tab:'T2',indices:selected.map(({index})=>index),source:JSON.stringify(b.v1)};
+  document.getElementById('dlgBatchBody').innerHTML=`
+    <div class="summary">
+      <div class="cell"><div class="lbl">账期</div><div class="val">${b.period}</div></div>
+      <div class="cell"><div class="lbl">待审核行数</div><div class="val">${selected.length}</div></div>
+      <div class="cell"><div class="lbl">借方金额（分）</div><div class="val">${fmt(selected.reduce((s,{row})=>s+(row.shkzg==='S'?Math.round(row.amt*100):0),0),0)}</div></div>
+      <div class="cell"><div class="lbl">贷方金额（分）</div><div class="val">${fmt(selected.reduce((s,{row})=>s+(row.shkzg==='H'?Math.round(row.amt*100):0),0),0)}</div></div>
+    </div><p class="import-note">仅审核当前筛选范围内的待审核凭证。</p>`;
+  document.getElementById('dlgBatch').classList.add('show');
+}
+
 function renderT2(){
   const tb=document.getElementById('t2Body');
   if(!tb)return;
   const b=BIZ[curBiz];
+  const visible=voucherRows(b);
+  document.getElementById('voucherPending').textContent=visible.filter(({row})=>row.st==='待审核').length;
+  document.getElementById('voucherUploadInfo').textContent=b.voucherUpload?`最近上传：${b.voucherUpload.name} · ${b.voucherUpload.rows} 行 · ${b.voucherUpload.user} · ${b.voucherUpload.time}`:'';
   const totalH=b.v1.filter(r=>r.shkzg==='H').reduce((s,r)=>s+r.amt,0);
   const totalS=b.v1.filter(r=>r.shkzg==='S').reduce((s,r)=>s+r.amt,0);
   const batchSet=new Set(b.v1.map(r=>r.batch));
@@ -1133,9 +1500,11 @@ function renderT2(){
     <div class="cell"><div class="lbl">凭证行数</div><div class="val">${b.v1.length}</div></div>
     <div class="cell"><div class="lbl">贷方合计</div><div class="val">${fmt(totalH*100)} 分</div></div>
     <div class="cell"><div class="lbl">借方合计</div><div class="val">${fmt(totalS*100)} 分</div></div>
-    <div class="cell ok"><div class="lbl">借贷平衡</div><div class="val">${Math.abs(totalH-totalS)<0.01?'平衡':'不平'}</div></div>
+    <div class="cell ${voucherBalance(b.v1).length?'warn':'ok'}"><div class="lbl">借贷平衡</div><div class="val">${voucherBalance(b.v1).length?'不平':'平衡'}</div></div>
   `;
-  tb.innerHTML = b.v1.map((r,i)=>`
+  tb.innerHTML = visible.map(({row,index:i})=>{
+    const r=Object.fromEntries(Object.entries(row).map(([key,value])=>[key,typeof value==='string'?escapeHtml(value):value]));
+    return `
     <tr data-idx="${i}">
       <td class="center" style="cursor:pointer;color:var(--pri);" onclick="toggleVoucher(${i})">${expanded[i]?'▼':'▶'}</td>
       <td><span class="mono">${r.batch}</span></td>
@@ -1155,7 +1524,7 @@ function renderT2(){
       <td>${st(r.st,r.st==='已通过'?'ok':(r.st==='已驳回'?'fail':'warn'))}</td>
     </tr>
     <tr class="v-det" id="vd${i}" style="display:${expanded[i]?'table-row':'none'};">
-      <td colspan="17"><div class="v-det-inner">
+      <td colspan="16"><div class="v-det-inner">
         <div class="ttl">完整 45 字段 SAP 凭证行</div>
         <div class="kv-grid">
           <div class="kv"><span class="k">BATCHID:</span><span class="v">${r.batch}</span></div>
@@ -1166,12 +1535,13 @@ function renderT2(){
           <div class="kv"><span class="k">BWRBTR:</span><span class="v">${fmt(r.amt*100)}</span></div>
           <div class="kv"><span class="k">PRCTR:</span><span class="v">${r.prctr}</span></div>
           <div class="kv"><span class="k">BUDAT:</span><span class="v">${r.budat}</span></div>
-          <div class="kv"><span class="k">USNAM:</span><span class="v">W8406768@XZ</span></div>
+          <div class="kv"><span class="k">USNAM:</span><span class="v">${escapeHtml(b.voucherUpload?.user||'W8406768@XZ')}</span></div>
           <div class="kv"><span class="k">SSGTXT:</span><span class="v">转拉萨分公司${r.gj}年${r.mo}月${r.txt}</span></div>
         </div>
       </div></td>
     </tr>
-  `).join('');
+  `}).join('')||'<tr><td colspan="16" class="empty">无匹配记录</td></tr>';
+  updateBusinessAccess();
 }
 
 function toggleVoucher(i){
@@ -1184,10 +1554,10 @@ function renderT3(){
   if(!tb)return;
   const kw=(document.getElementById('kw3')?.value||'').toLowerCase();
   const st=(document.getElementById('fltSt')?.value||'全部');
-  let arr=EDA_DATA.slice();
+  let arr=BIZ[curBiz].eda.slice();
   if(kw)arr=arr.filter(r=>r.mid.toLowerCase().includes(kw)||r.file.toLowerCase().includes(kw));
   if(st!=='全部')arr=arr.filter(r=>r.c===st);
-  if(!arr.length){tb.innerHTML=`<tr><td colspan="9" class="empty">无匹配记录</td></tr>`;return;}
+  if(!arr.length){tb.innerHTML=`<tr><td colspan="10" class="empty">无匹配记录</td></tr>`;return;}
   tb.innerHTML=arr.map(r=>{
     const fail=r.c==='通知失败';
     return `<tr class="${fail?'fail':''}">
@@ -1196,45 +1566,72 @@ function renderT3(){
       <td>${r.batch==='-'?'-':`<span class="mono ellipsis" style="max-width:140px;">${r.batch}</span>`}</td>
       <td>${r.ts}</td>
       <td>${stEl(r.c,r.c==='通知失败'?'fail':(r.c==='已采集'?'ok':'gray'))}</td>
-      <td>${stEl(r.p1,'warn')}</td>
-      <td>${stEl(r.p2,'warn')}</td>
-      <td>${stEl(r.v1,'warn')}</td>
-      <td class="op"><button class="btn sm link" onclick="showPosting()">查看过账</button></td>
+      <td>${stEl(r.p1,statusClass(r.p1))}</td>
+      <td>${stEl(r.p2,statusClass(r.p2))}</td>
+      <td>${stEl(r.v1,statusClass(r.v1))}</td>
+      <td>${stEl(r.v2,statusClass(r.v2))}</td>
+      <td class="op"><button class="btn sm link" data-read onclick="showPosting(${BIZ[curBiz].eda.indexOf(r)})">详细日志</button></td>
     </tr>`;
   }).join('');
+  updateBusinessAccess();
 }
 
 function stEl(t,k){return `<span class="st ${k}">${t}</span>`}
 
-function showPosting(){
-  const bs=[{no:'B0262025090000098',vst:'-',ctime:'2026-03-11 14:55:41',result:'-'},{no:'B0262025090000097',vst:'-',ctime:'2026-03-11 14:55:41',result:'-'}];
-  document.getElementById('dlgPostCnt').textContent=bs.length;
-  document.getElementById('dlgPostBody').innerHTML=bs.map((b,i)=>`
-    <div class="b-block">
-      <h4><span class="idx">#${i+1}</span>批次号 ${b.no}</h4>
-      <div class="grid">
-        <div class="gf"><div class="lbl">批次号</div><div class="val">${b.no}</div></div>
-        <div class="gf"><div class="lbl">过账校验状态</div><div class="val">${stEl(b.vst,'gray')}</div></div>
-        <div class="gf"><div class="lbl">创建时间</div><div class="val">${b.ctime}</div></div>
-      </div>
-      <div class="res"><b style="color:var(--ink-3);">过账结果:</b><br>${b.result||'-'}</div>
-    </div>
-  `).join('');
+let postingTarget=null;
+function showPosting(index){
+  const r=BIZ[curBiz].eda[index];
+  if(!r)return;
+  postingTarget={biz:curBiz,mid:r.mid};
+  const stages=[['上传文件','成功',r.ts,'文件已上传'],['采集通知',r.c,'-',r.c==='通知失败'?'采集通知失败，暂无后续回执':'采集状态：'+r.c],
+    ['解析1',r.p1,'-','解析回执'],['解析2',r.p2,'-','解析回执'],
+    ['入库效验',r.v1,'-','入库校验回执'],['过账效验',r.v2,r.retryAt||'-',r.retryAt?'已提交重新过账请求（演示）':'过账校验回执']];
+  document.getElementById('dlgPostCnt').textContent=stages.length;
+  document.getElementById('dlgPostBody').innerHTML=`
+    <div class="b-block"><div class="grid">
+      <div class="gf"><div class="lbl">消息 ID</div><div class="val">${escapeHtml(r.mid)}</div></div>
+      <div class="gf"><div class="lbl">批次号</div><div class="val">${escapeHtml(r.batch)}</div></div>
+    </div><div class="res">${escapeHtml(r.file)}</div></div>
+    <div class="tbl"><table><thead><tr><th>环节</th><th>状态</th><th>时间</th><th>日志</th></tr></thead><tbody>
+    ${stages.map(([name,state,time,detail])=>`<tr><td>${name}</td><td>${stEl(state,statusClass(state))}</td><td>${escapeHtml(time)}</td><td>${escapeHtml((state==='-'||state==='待校验')&&!(name==='过账效验'&&r.retryAt)?'暂无回执':detail)}</td></tr>`).join('')}
+    </tbody></table></div>`;
+  updateBusinessAccess();
   document.getElementById('dlgPost').classList.add('show');
 }
 
-function addEda(){
-  const now=new Date();
-  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  EDA_DATA.unshift({mid:`EDA@891;test;00001;01`,file:`DAPM_MSS_INCOME.${BIZ[curBiz].period}.202509.02.001.001.854.DAT`,path:'/data/program/src/zyg/file',batch:`A026${BIZ[curBiz].period}000020009`,ts,c:'已采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'-'});
+function retryPosting(){
+  return writeBusiness(()=>{
+  if(!postingTarget||postingTarget.biz!==curBiz)return;
+  const r=BIZ[curBiz].eda.find(row=>row.mid===postingTarget.mid);
+  if(!r||!['已通过','校验通过'].includes(r.v1))return toast('入库校验通过后才可重新过账','error');
+  r.v2='待校验';
+  r.retryAt=new Date().toLocaleString('sv-SE');
   renderT3();
+  showPosting(BIZ[curBiz].eda.indexOf(r));
+  toast('重新过账请求已提交（演示）','success');
+  });
 }
 
-function doAcquire(){toast(`取数完成,临时表 temp_${curBiz}_yj_${BIZ[curBiz].period}`,'success');renderT1()}
-function doCompose(){setTimeout(()=>{renderT2();toast('已生成凭证','success')},300)}
+function addEda(){
+  return writeBusiness(()=>{
+  if(!BIZ[curBiz].v1.length||BIZ[curBiz].v1.some(row=>row.st!=='已通过')||voucherBalance(BIZ[curBiz].v1).length)
+    return toast('请先完成全部凭证审核并确认借贷平衡','error');
+  const now=new Date();
+  const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  BIZ[curBiz].eda.unshift({mid:`EDA@891;${Date.now()};${BIZ[curBiz].eda.length};01`,file:`DAPM_MSS_INCOME.${BIZ[curBiz].period}.${BIZ[curBiz].code}.DAT`,path:'/data/program/src/zyg/file',batch:BIZ[curBiz].v1[0]?.batch||'-',ts,c:'已采集',p1:'待校验',p2:'待校验',v1:'待校验',v2:'待校验'});
+  renderT3();
+  toast('已生成 SAP 报文文件（演示）','success');
+  });
+}
+
+function doAcquire(){return writeBusiness(()=>{toast(`取数完成,临时表 temp_${curBiz}_yj_${BIZ[curBiz].period}`,'success');renderT1()})}
+function doCompose(){return writeBusiness(()=>{
+  BIZ[curBiz].v1.forEach(row=>row.st='待审核');
+  renderT2();toast('凭证加工完成，请审核（演示）','success');
+})}
 
 function openAudit(tab,i){
-  auditTarget={tab,idx:i};
+  auditTarget={tab,idx:i,biz:curBiz};
   const b=BIZ[curBiz];
   let r;
   if(tab==='T1')r=b.t1[i];
@@ -1267,7 +1664,8 @@ function openAudit(tab,i){
 }
 
 function auditConfirm(pass){
-  if(!auditTarget)return;
+  return writeBusiness(()=>{
+  if(!auditTarget||auditTarget.biz!==curBiz)return;
   const b=BIZ[curBiz];
   const tab=auditTarget.tab;
   const arr=tab==='T1'?b.t1:(tab==='EXCEL'?b.excel_data:b.v1);
@@ -1278,11 +1676,15 @@ function auditConfirm(pass){
   else if(tab==='EXCEL')renderExcel();
   else renderT2();
   toast(pass?'已审核通过':'已驳回',pass?'success':'error');
+  });
 }
 
 function openBatchExcelAudit(){
+  if(!requireBusinessOwner())return;
   const b=BIZ[curBiz];
   const pending=b.excel_data.filter(r=>r.st==='待审核');
+  if(!pending.length)return toast('没有待审核的集团数据');
+  batchTarget={biz:curBiz,user:currentUser,token:readWorkflow().token,tab:'EXCEL',indices:b.excel_data.flatMap((r,i)=>r.st==='待审核'?[i]:[]),source:JSON.stringify(b.excel_data)};
   const totalAmt=pending.reduce((s,r)=>s+r.fee_qf,0);
   document.getElementById('dlgBatchBody').innerHTML=`
     <div class="summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
@@ -1297,36 +1699,40 @@ function openBatchExcelAudit(){
 }
 
 function openBatchAudit(){
+  if(!requireBusinessOwner())return;
   const b=BIZ[curBiz];
   const pending=b.t1.filter(r=>r.st==='待审核');
+  if(!pending.length)return toast('没有待审核的数据');
+  batchTarget={biz:curBiz,user:currentUser,token:readWorkflow().token,tab:'T1',indices:b.t1.flatMap((r,i)=>r.st==='待审核'?[i]:[]),source:JSON.stringify(b.t1)};
   const totalAmt=pending.reduce((s,r)=>s+r.fee,0);
   document.getElementById('dlgBatchBody').innerHTML=`
     <div class="summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">
       <div class="cell"><div class="lbl">账期</div><div class="val">${b.period}</div></div>
       <div class="cell"><div class="lbl">待审核条数</div><div class="val">${pending.length}</div></div>
-      <div class="cell warn"><div class="lbl">待审核金额(元)</div><div class="val">${fmt(totalAmt)}</div></div>
+      <div class="cell warn"><div class="lbl">待审核金额(元)</div><div class="val">${fmt(totalAmt/100)}</div></div>
     </div>
-    <div style="color:var(--ink-2);margin-bottom:8px;font-size:13px;">筛选条件(只处理范围内):</div>
-    <div class="filter-bar" style="padding:0;">
-      <div class="field"><span class="lbl">本地网</span><select class="sel sm"><option>全部</option><option>891</option></select></div>
-      <div class="field"><span class="lbl">金额</span>
-        <input class="ipt sm" placeholder="最小" style="min-width:90px;"/>
-        <span style="color:#c9cdd4;">—</span>
-        <input class="ipt sm" placeholder="最大" style="min-width:90px;"/>
-      </div>
-    </div>
-    <div style="margin-top:12px;color:var(--ink-3);font-size:12px;">将作用于筛选范围内的所有"待审核"记录</div>
+    <p class="import-note">审核当前业务账期的全部待审核数据。</p>
   `;
   document.getElementById('dlgBatch').classList.add('show');
 }
 
 function batchConfirm(pass){
+  return writeBusiness(()=>{
+  if(!batchTarget||batchTarget.biz!==curBiz||batchTarget.user!==currentUser||batchTarget.token!==readWorkflow().token)return;
   const b=BIZ[curBiz];
+  const tab=batchTarget.tab;
+  const rows=tab==='T2'?b.v1:tab==='EXCEL'?b.excel_data:b.t1;
+  if(JSON.stringify(rows)!==batchTarget.source)return toast('数据已发生变化，请重新打开审核窗口','error');
+  if(pass&&tab==='T2'&&voucherBalance(rows).length)return toast('凭证借贷不平衡，无法通过审核','error');
   let cnt=0;
-  b.t1.forEach(r=>{if(r.st==='待审核'){r.st=pass?'已通过':'已驳回';cnt++}});
+  batchTarget.indices.forEach(i=>{const r=rows[i];if(r?.st==='待审核'){r.st=pass?'已通过':'已驳回';cnt++}});
+  batchTarget=null;
   closeDlg('dlgBatch');
-  renderT1();
+  if(tab==='T2')renderT2();
+  else if(tab==='EXCEL')renderExcel();
+  else renderT1();
   toast(pass?`已批量通过 ${cnt} 条`:`已批量驳回 ${cnt} 条`,pass?'success':'error');
+  });
 }
 
 // ====================== 数据源管理 ======================
@@ -1938,6 +2344,7 @@ function renderSnap(){
 }
 
 // 初始化
+document.getElementById('demoAccount').value=currentUser;
 renderBiz('settle02');
 </script>
 </body>
